@@ -1,8 +1,3 @@
-#define _CRT_SECURE_NO_WARNINGS
-
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-
 #include <BearLibTerminal.h>
 
 int main(int argc, char** argv)
@@ -12,30 +7,25 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    terminal_set("window: title='Rogue Like One', size=132x50");
+    terminal_set("window: title='Rogue Like One', size=80x25");
     terminal_set("font: ../Media/UbuntuMono-R.ttf, size=12");
 
     terminal_refresh();
 
-    bool wantExit = false;
+    bool want_exit = false;
 
-    while (!wantExit)
+    while (!want_exit)
     {
-        terminal_print(1, 1, "@");
+        terminal_put(0, 0, '@');
         terminal_refresh();
 
         if (terminal_has_input() && terminal_read() == TK_CLOSE)
         {
-            wantExit = true;
+            want_exit = true;
         }
     }
 
     terminal_close();
 
     return 0;
-}
-
-int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
-    return main(__argc, __argv);
 }
