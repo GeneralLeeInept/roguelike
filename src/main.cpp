@@ -4,189 +4,47 @@
 #include <vector>
 
 #include "map_def.h"
+#include "renderer.h"
 
 #define SCREEN_WIDTH 80
 #define SCREEN_HEIGHT 25
-#define STRINGIZE(x__) #x__
+#define STRINGIZE(s_) STRINGIZE2(s_)
+#define STRINGIZE2(s_) #s_
 #define SCREEN_SIZE STRINGIZE(SCREEN_WIDTH) "x" STRINGIZE(SCREEN_HEIGHT)
 
-class DrawMap
-{
-public:
-    DrawMap(int mapLayer)
-        : mMapLayer(mapLayer)
-    {
-    }
-
-    bool initialise(const MapDef& def)
-    {
-        mWidth = def.width;
-        mHeight = def.height;
-        mTiles.reset(new Tile[mWidth * mHeight]);
-
-        for (int y = 0; y < mHeight; ++y)
-        {
-            for (int x = 0; x < mWidth; ++x)
-            {
-                Tile& tile = tile_at(x, y);
-
-                switch (def.tiles[x + y * def.width].type)
-                {
-                    case 0:
-                    {
-                        tile.code = ' ';
-                        break;
-                    }
-                    case 1:
-                    {
-                        tile.code = '.';
-                        tile.colour = color_from_argb(0xff, 0xA0, 0xA0, 0xA0);
-                        break;
-                    }
-                    case 2:
-                    {
-                        tile.code = '#';
-                        tile.colour = color_from_argb(0xff, 0xff, 0xff, 0xff);
-                        break;
-                    }
-                    default:
-                    {
-                        tile.code = '?';
-                        tile.colour = color_from_argb(0xff, 0xff, 0x00, 0x00);
-                        break;
-                    }
-                }
-            }
-        }
-
-        return true;
-    }
-    
-    typedef size_t ActorHandle;
-
-    ActorHandle create_actor(int code, color_t colour, int x, int y)
-    {
-        Actor *actor = nullptr;
-        size_t index;
-
-        for (index = 0; index < mActors.size(); ++index)
-        {
-            if (!mActors[index].in_use)
-            {
-                actor = &mActors[index];
-                break;
-            }
-        }
-
-        if (actor == nullptr)
-        {
-            mActors.push_back(Actor());
-            actor = &mActors.back();
-        }
-
-        actor->code = code;
-        actor->colour = colour;
-        actor->x = x;
-        actor->y = y;
-        actor->in_use = true;
-
-        return index;
-    }
-
-    void destroy_actor(ActorHandle handle)
-    {
-        mActors[handle].in_use = false;
-    }
-
-    void set_actor_position(ActorHandle handle, int x, int y)
-    {
-        mActors[handle].x = x;
-        mActors[handle].y = y;
-    }
-
-    void set_actor_colour(ActorHandle handle, color_t colour)
-    {
-    }
-
-    void set_actor_code(ActorHandle handle, int code)
-    {
-
-    }
-
-    void render()
-    {
-        int restoreLayer = terminal_state(TK_LAYER);
-
-        // Draw map
-        terminal_layer(mMapLayer);
-        terminal_clear_area(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-
-        for (int y = 0; y < mHeight; ++y)
-        {
-            for (int x = 0; x < mWidth; ++x)
-            {
-                Tile& tile = tile_at(x, y);
-                terminal_color(tile.colour);
-                terminal_put(x, y, tile.code);
-            }
-        }
-
-        // Draw actors
-        terminal_layer(mMapLayer + 1);
-        terminal_clear_area(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-
-        for (auto actor : mActors)
-        {
-            if (actor.in_use)
-            {
-                terminal_color(actor.colour);
-                terminal_put(actor.x, actor.y, actor.code);
-            }
-        }
-
-        terminal_layer(restoreLayer);
-    }
-
-private:
-    struct Tile
-    {
-        color_t colour;
-        int code;
-    };
-
-    struct Actor
-    {
-        int x, y;
-        color_t colour;
-        int code;
-        bool in_use;
-    };
-
-    int mMapLayer;
-    int mWidth;
-    int mHeight;
-    std::unique_ptr<Tile> mTiles;
-    std::vector<Actor> mActors;
-
-    Tile& tile_at(int x, int y) { return mTiles.get()[x + y * mWidth]; }
+char* map_data[] = {
+    "################################################################################",
+    "#                                                                              #",
+    "#                                                                              #",
+    "#                                                                              #",
+    "#                                 #   #                                        #",
+    "#                                  # #                                         #",
+    "#                                   #                                          #",
+    "#                                  # #                                         #",
+    "#                                 #   #                                        #",
+    "#                                                                              #",
+    "#                     #                            #####                       #",
+    "#                    ###                           #####                       #",
+    "#                   #####                          #####                       #",
+    "#                    ###                           #####                       #",
+    "#                     #                            #####                       #",
+    "#                                                                              #",
+    "#                                                                              #",
+    "#                               ######                                         #",
+    "#                              #      #                                        #",
+    "#                             #        #                                       #",
+    "#                                                                              #",
+    "#                                                                              #",
+    "#                                                                              #",
+    "#                                                                              #",
+    "################################################################################",
 };
 
-char map_data[] = {
-    "####################################################"
-    "#                                                  #"
-    "#                                                  #"
-    "#             #                 ###                #"
-    "#            ###                ###                #"
-    "#             #                 ###                #"
-    "#                                                  #"
-    "#                                                  #"
-    "####################################################"
-};
-
+MapDef map_def;
+Renderer renderer;
 int player_x;
 int player_y;
 bool want_exit;
-DrawMap draw_map(0);
 
 void process_input()
 {
@@ -219,28 +77,19 @@ void process_input()
 
 void init_map()
 {
-    TileDef tiles[SCREEN_WIDTH * SCREEN_HEIGHT];
-    memset(tiles, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(TileDef));
+    map_def.width = static_cast<int>(strlen(map_data[0]));
+    map_def.height = sizeof(map_data) / sizeof(map_data[0]);
+    map_def.tiles.resize(map_def.width * map_def.height);
 
-    int source_width = sizeof(map_data) / 9;
-    int source_height = 9;
-    int y = (25 - source_height) / 2;
-
-    for (int h = 0; h < source_height; ++h, ++y)
+    for (int y = 0; y < map_def.height; ++y)
     {
-        int x = (80 - source_width) / 2;
-
-        for (int w = 0; w < source_width; ++w, ++x)
+        for (int x = 0; x < map_def.width; ++x)
         {
-            tiles[x + y * 80].type = map_data[w + h * source_width] == ' ' ? 1 : 2;
+            map_def.tiles[x + y * map_def.width].type = map_data[y][x] == ' ' ? TileType::Floor : TileType::Wall;
         }
     }
 
-    MapDef map_def;
-    map_def.width = 80;
-    map_def.height = 25;
-    map_def.tiles = tiles;
-    draw_map.initialise(map_def);
+    renderer.map_create(map_def);
 }
 
 int main(int argc, char** argv)
@@ -250,21 +99,21 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    init_map();
-
     terminal_set("window: title='Rogue Like One', size=" SCREEN_SIZE);
     terminal_set("font: ../Media/UbuntuMono-R.ttf, size=12");
 
-    player_x = 40;
-    player_y = 12;
+    init_map();
+
+    player_x = map_def.width / 2;
+    player_y = map_def.height / 2;
     want_exit = false;
 
-    DrawMap::ActorHandle player = draw_map.create_actor('@', color_from_name("white"), player_x, player_y);
+    Renderer::ActorHandle player = renderer.actor_create('@', color_from_name("white"));
 
     while (!want_exit)
     {
-        draw_map.set_actor_position(player, player_x, player_y);
-        draw_map.render();
+        renderer.actor_set_position(player, player_x, player_y);
+        renderer.draw_game();
         terminal_refresh();
         process_input();
     }

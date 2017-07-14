@@ -1,13 +1,21 @@
 #pragma once
+#include <cstdint>
+#include <vector>
 
-struct TileDef
+enum class TileType : int8_t
 {
-    int type;
+    Floor,
+    Wall,
 };
 
 struct MapDef
 {
+    struct Tile
+    {
+        TileType type;
+    };
+
     int width;
     int height;
-    TileDef* tiles;
+    std::vector<Tile> tiles;
 };

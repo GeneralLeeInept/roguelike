@@ -1,19 +1,49 @@
 #pragma once
 #include <BearLibTerminal.h>
 
-class MapDef;
+#include <memory>
+#include <vector>
+
+struct MapDef;
+
+struct RendererMap
+{
+    struct Tile
+    {
+        int code;
+        color_t colour;
+    };
+
+    int width;
+    int height;
+    std::vector<Tile> tiles;
+};
+
+struct RendererActor
+{
+    int code;
+    color_t colour;
+    int x;
+    int y;
+};
 
 class Renderer
 {
 public:
-    typedef intptr_t MapHandle;
-    typedef intptr_t ActorHandle;
+    Renderer() = default;
+    Renderer(const Renderer&) = delete;
+    Renderer& operator=(const Renderer&) = delete;
 
-    MapHandle map_create(const MapDef &map_def);
+    void map_create(const MapDef& map_def);
+
+    typedef size_t ActorHandle;
 
     ActorHandle actor_create(int code, color_t colour);
-    void actor_set_visible(ActorHandle actor, bool visible);
     void actor_set_position(ActorHandle actor, int x, int y);
 
     void draw_game();
+
+private:
+    std::unique_ptr<RendererMap> _map;
+    std::vector<RendererActor> _actors;
 };
