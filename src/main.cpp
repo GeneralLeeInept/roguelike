@@ -74,11 +74,11 @@ void process_input()
         {
             player_x += 1;
         }
-        else if (key >= TK_3 && key <= TK_8)
+        else if (key >= TK_2 && key <= TK_6)
         {
-            test_roller = key - TK_3 + 3;
+            test_roller = (key - TK_2 + 2) * 2;
         }
-        else if (key == TK_2)
+        else if (key == TK_0)
         {
             test_roller = 20;
         }

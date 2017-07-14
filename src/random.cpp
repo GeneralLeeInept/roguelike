@@ -35,12 +35,12 @@ Roller::Roller(int sides)
 
 int Roller::roll()
 {
-    int val;
+    int val = 0;
     
-    do
+    while (val < 1 || val > _sides)
     {
         val = static_cast<int>(std::floor(_distribution(_generator)));
-    } while (val < 1 || val > _sides);
+    } 
 
     return val;
 }
