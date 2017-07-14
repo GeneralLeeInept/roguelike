@@ -28,7 +28,7 @@ void Renderer::map_create(const MapDef& map_def)
             case TileType::Wall:
             {
                 map_tile.code = '#';
-                map_tile.colour = color_from_name("lightest blue");
+                map_tile.colour = color_from_name("lighter orange");
                 break;
             }
             default:

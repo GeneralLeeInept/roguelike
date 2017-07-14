@@ -16,12 +16,18 @@
     <ClCompile Include="..\..\..\src\renderer.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\random.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\renderer.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\map_def.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\random.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

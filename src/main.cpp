@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "map_def.h"
+#include "random.h"
 #include "renderer.h"
 
 #define SCREEN_WIDTH 80
@@ -45,6 +46,7 @@ Renderer renderer;
 int player_x;
 int player_y;
 bool want_exit;
+int test_roller = 0;
 
 void process_input()
 {
@@ -71,6 +73,18 @@ void process_input()
         else if (key == TK_RIGHT)
         {
             player_x += 1;
+        }
+        else if (key >= TK_3 && key <= TK_8)
+        {
+            test_roller = key - TK_3 + 3;
+        }
+        else if (key == TK_2)
+        {
+            test_roller = 20;
+        }
+        else if (key == TK_1)
+        {
+            test_roller = 100;
         }
     }
 }
@@ -116,6 +130,13 @@ int main(int argc, char** argv)
         renderer.draw_game();
         terminal_refresh();
         process_input();
+
+        if (test_roller)
+        {
+            Roller die(test_roller);
+            die.test();
+            test_roller = 0;
+        }
     }
 
     terminal_close();
