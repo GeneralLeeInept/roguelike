@@ -153,7 +153,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main.cpp" />
+    <ClCompile Include="..\..\..\src\renderer.cpp" />
     <ClCompile Include="..\src\winmain.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\map_def.h" />
+    <ClInclude Include="..\..\..\src\renderer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
