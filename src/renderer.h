@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+class Fov;
 struct MapDef;
 
 struct RendererMap
@@ -41,7 +42,7 @@ public:
     ActorHandle actor_create(int code, color_t colour);
     void actor_set_position(ActorHandle actor, int x, int y);
 
-    void draw_game();
+    void draw_game(const Fov &fov);
 
 private:
     std::unique_ptr<RendererMap> _map;

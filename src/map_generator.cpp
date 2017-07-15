@@ -180,3 +180,20 @@ void BasicMapGenerator::generate_map(int width, int height, MapDef& map_def)
     map_def.spawn_x = spawn.x;
     map_def.spawn_y = spawn.y;
 }
+
+void FovTestMapGenerator::generate_map(int width, int height, MapDef& map_def)
+{
+    map_def.width = width;
+    map_def.height = height;
+    map_def.tiles.resize(width * height);
+
+    for (auto& t : map_def.tiles)
+    {
+        t.type = TileType::Wall;
+    }
+
+    map_def.spawn_x = width / 2;
+    map_def.spawn_y = height / 2;
+
+    map_def.tiles[map_def.spawn_x + map_def.spawn_y * width].type = TileType::Floor;
+}

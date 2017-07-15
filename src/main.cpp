@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "fov.h"
 #include "map_def.h"
 #include "map_generator.h"
 #include "random.h"
@@ -16,6 +17,7 @@
 
 MapDef map_def;
 Renderer renderer;
+Fov fov(SCREEN_WIDTH);
 int player_x;
 int player_y;
 bool want_exit;
@@ -58,6 +60,8 @@ void init_map()
 {
     BasicMapGenerator generator;
     generator.configure(100, 5, 11);
+
+    //FovTestMapGenerator generator;
     generator.generate_map(SCREEN_WIDTH, SCREEN_HEIGHT, map_def);
     renderer.map_create(map_def);
 }
@@ -83,7 +87,8 @@ int main(int argc, char** argv)
     while (!want_exit)
     {
         renderer.actor_set_position(player, player_x, player_y);
-        renderer.draw_game();
+        fov.update(player_x, player_y, map_def);
+        renderer.draw_game(fov);
         terminal_refresh();
         process_input();
     }

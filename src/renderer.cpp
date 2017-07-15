@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "fov.h"
 #include "map_def.h"
 
 void Renderer::map_create(const MapDef& map_def)
@@ -58,7 +59,7 @@ void Renderer::actor_set_position(ActorHandle actor, int x, int y)
     _actors[actor].y = y;
 }
 
-void Renderer::draw_game()
+void Renderer::draw_game(const Fov &fov)
 {
     int view_width = std::min(terminal_state(TK_WIDTH), _map ? _map->width : 0);
     int view_height = std::min(terminal_state(TK_HEIGHT), _map ? _map->height : 0);
@@ -75,8 +76,11 @@ void Renderer::draw_game()
         {
             for (int x = 0; x < view_width; ++x, ++tile)
             {
-                terminal_color(tile->colour);
-                terminal_put(x, y, tile->code);
+                if (fov.can_see(x, y))
+                {
+                    terminal_color(tile->colour);
+                    terminal_put(x, y, tile->code);
+                }
             }
         }
     }
@@ -86,7 +90,10 @@ void Renderer::draw_game()
 
     for (auto actor : _actors)
     {
-        terminal_color(actor.colour);
-        terminal_put(actor.x, actor.y, actor.code);
+        if (fov.can_see(actor.x, actor.y))
+        {
+            terminal_color(actor.colour);
+            terminal_put(actor.x, actor.y, actor.code);
+        }
     }
 }
