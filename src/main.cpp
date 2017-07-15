@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "map_def.h"
+#include "map_generator.h"
 #include "random.h"
 #include "renderer.h"
 
@@ -13,40 +14,17 @@
 #define STRINGIZE2(s_) #s_
 #define SCREEN_SIZE STRINGIZE(SCREEN_WIDTH) "x" STRINGIZE(SCREEN_HEIGHT)
 
-char* map_data[] = {
-    "################################################################################",
-    "#                                                                              #",
-    "#                                                                              #",
-    "#                                                                              #",
-    "#                                 #   #                                        #",
-    "#                                  # #                                         #",
-    "#                                   #                                          #",
-    "#                                  # #                                         #",
-    "#                                 #   #                                        #",
-    "#                                                                              #",
-    "#                     #                            #####                       #",
-    "#                    ###                           #####                       #",
-    "#                   #####                          #####                       #",
-    "#                    ###                           #####                       #",
-    "#                     #                            #####                       #",
-    "#                                                                              #",
-    "#                                                                              #",
-    "#                               ######                                         #",
-    "#                              #      #                                        #",
-    "#                             #        #                                       #",
-    "#                                                                              #",
-    "#                                                                              #",
-    "#                                                                              #",
-    "#                                                                              #",
-    "################################################################################",
-};
-
 MapDef map_def;
 Renderer renderer;
 int player_x;
 int player_y;
 bool want_exit;
 int test_roller = 0;
+
+bool can_walk(int x, int y)
+{
+    return map_def.tiles[x + y * map_def.width].type == TileType::Floor;
+}
 
 void process_input()
 {
@@ -58,19 +36,19 @@ void process_input()
         {
             want_exit = true;
         }
-        else if (key == TK_UP)
+        else if (key == TK_UP && can_walk(player_x, player_y - 1))
         {
             player_y -= 1;
         }
-        else if (key == TK_DOWN)
+        else if (key == TK_DOWN && can_walk(player_x, player_y + 1))
         {
             player_y += 1;
         }
-        else if (key == TK_LEFT)
+        else if (key == TK_LEFT && can_walk(player_x - 1, player_y))
         {
             player_x -= 1;
         }
-        else if (key == TK_RIGHT)
+        else if (key == TK_RIGHT && can_walk(player_x + 1, player_y))
         {
             player_x += 1;
         }
@@ -91,18 +69,8 @@ void process_input()
 
 void init_map()
 {
-    map_def.width = static_cast<int>(strlen(map_data[0]));
-    map_def.height = sizeof(map_data) / sizeof(map_data[0]);
-    map_def.tiles.resize(map_def.width * map_def.height);
-
-    for (int y = 0; y < map_def.height; ++y)
-    {
-        for (int x = 0; x < map_def.width; ++x)
-        {
-            map_def.tiles[x + y * map_def.width].type = map_data[y][x] == ' ' ? TileType::Floor : TileType::Wall;
-        }
-    }
-
+    BasicMapGenerator generator;
+    generator.generate_map(SCREEN_WIDTH, SCREEN_HEIGHT, map_def);
     renderer.map_create(map_def);
 }
 
@@ -118,8 +86,8 @@ int main(int argc, char** argv)
 
     init_map();
 
-    player_x = map_def.width / 2;
-    player_y = map_def.height / 2;
+    player_x = map_def.spawn_x;
+    player_y = map_def.spawn_y;
     want_exit = false;
 
     Renderer::ActorHandle player = renderer.actor_create('@', color_from_name("white"));
@@ -133,8 +101,7 @@ int main(int argc, char** argv)
 
         if (test_roller)
         {
-            Roller die(test_roller);
-            die.test();
+            test_random<Roller>(test_roller);
             test_roller = 0;
         }
     }

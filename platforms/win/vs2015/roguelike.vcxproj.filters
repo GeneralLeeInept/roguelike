@@ -19,6 +19,9 @@
     <ClCompile Include="..\..\..\src\random.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\map_genarator.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\renderer.h">
@@ -28,6 +31,9 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\random.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\map_generator.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

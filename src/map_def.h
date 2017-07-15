@@ -17,5 +17,7 @@ struct MapDef
 
     int width;
     int height;
+    int spawn_x;
+    int spawn_y;
     std::vector<Tile> tiles;
 };
