@@ -18,5 +18,12 @@ public:
 class BasicMapGenerator : MapGenerator
 {
 public:
+    void configure(int num_rooms, int room_min_size, int room_max_size);
+
     void generate_map(int width, int height, MapDef &map_def) override;
+
+private:
+    int _num_rooms;
+    int _room_min_size;
+    int _room_max_size;
 };

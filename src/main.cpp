@@ -70,6 +70,7 @@ void process_input()
 void init_map()
 {
     BasicMapGenerator generator;
+    generator.configure(7, 5, 11);
     generator.generate_map(SCREEN_WIDTH, SCREEN_HEIGHT, map_def);
     renderer.map_create(map_def);
 }
