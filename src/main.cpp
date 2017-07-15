@@ -19,7 +19,6 @@ Renderer renderer;
 int player_x;
 int player_y;
 bool want_exit;
-int test_roller = 0;
 
 bool can_walk(int x, int y)
 {
@@ -52,25 +51,13 @@ void process_input()
         {
             player_x += 1;
         }
-        else if (key >= TK_2 && key <= TK_6)
-        {
-            test_roller = (key - TK_2 + 2) * 2;
-        }
-        else if (key == TK_0)
-        {
-            test_roller = 20;
-        }
-        else if (key == TK_1)
-        {
-            test_roller = 100;
-        }
     }
 }
 
 void init_map()
 {
     BasicMapGenerator generator;
-    generator.configure(7, 5, 11);
+    generator.configure(100, 5, 11);
     generator.generate_map(SCREEN_WIDTH, SCREEN_HEIGHT, map_def);
     renderer.map_create(map_def);
 }
@@ -99,12 +86,6 @@ int main(int argc, char** argv)
         renderer.draw_game();
         terminal_refresh();
         process_input();
-
-        if (test_roller)
-        {
-            test_random<Roller>(test_roller);
-            test_roller = 0;
-        }
     }
 
     terminal_close();

@@ -31,6 +31,14 @@ static bool overlap(const Rect& r1, const Rect& r2)
     return true;
 }
 
+static Point get_centre_point(const Rect& r)
+{
+    Point centre;
+    centre.x = (r.tlc.x + r.brc.x) / 2;
+    centre.y = (r.tlc.y + r.brc.y) / 2;
+    return centre;
+}
+
 static void dig_room(const Rect& room, MapDef& map_def)
 {
     for (int y = room.tlc.y; y <= room.brc.y; ++y)
@@ -93,9 +101,9 @@ static void dig_tunnel(const Point& start, const Point& end, MapDef& map_def)
     }
 }
 
-void BasicMapGenerator::configure(int num_rooms, int room_min_size, int room_max_size)
+void BasicMapGenerator::configure(int max_rooms, int room_min_size, int room_max_size)
 {
-    _num_rooms = num_rooms;
+    _max_rooms = max_rooms;
     _room_min_size = room_min_size;
     _room_max_size = room_max_size;
 }
@@ -118,59 +126,38 @@ void BasicMapGenerator::generate_map(int width, int height, MapDef& map_def)
     Random room_origin_x(_room_min_size / 2 + 1, width - _room_min_size / 2 + 1);
     Random room_origin_y(_room_min_size / 2 + 1, height - _room_min_size / 2 + 1);
 
-    while (rooms.size() < _num_rooms)
+    for (int n = 0; n < _max_rooms; ++n)
     {
         // Add a room
-        int fails = 0;
-        bool abort = false;
-        bool keep = false;
+        int w = room_size();
+        int h = room_size();
+        int x = room_origin_x();
+        int y = room_origin_y();
+        Rect room = { { x - w / 2, y - h / 2 }, { x + w, y + h } };
 
-        while (!keep && !abort)
+        if (room.tlc.x < 1 || room.tlc.y < 1 || room.brc.x >= width - 1 || room.brc.y >= height - 1)
         {
-            keep = true;
+            continue;
+        }
+        else
+        {
+            bool keep = true;
 
-            if (++fails > 100)
+            for (auto& r : rooms)
             {
-                abort = true;
-                break;
+                if (overlap(r, room))
+                {
+                    keep = false;
+                    break;
+                }
             }
 
-            int w = room_size();
-            int h = room_size();
-            int x = room_origin_x();
-            int y = room_origin_y();
-
-            Rect room = { { x - w / 2, y - h / 2 }, { x + w, y + h } };
-
-            if (room.tlc.x < 1 || room.tlc.y < 1 || room.brc.x >= width - 1 || room.brc.y >= height - 1)
+            if (!keep)
             {
-                keep = false;
                 continue;
             }
-            else
-            {
-                for (auto& r : rooms)
-                {
-                    if (overlap(r, room))
-                    {
-                        keep = false;
-                        break;
-                    }
-                }
 
-                if (!keep)
-                {
-                    continue;
-                }
-
-                rooms.push_back(room);
-            }
-        }
-
-        if (abort)
-        {
-            // Failed to create a room too many times, start over
-            rooms.clear();
+            rooms.push_back(room);
         }
     }
 
@@ -181,14 +168,15 @@ void BasicMapGenerator::generate_map(int width, int height, MapDef& map_def)
     }
 
     // Connect rooms
-    for (int n = 1; n < _num_rooms; ++n)
+    for (size_t n = 1; n < rooms.size(); ++n)
     {
-        Point start = { (rooms[n - 1].tlc.x + rooms[n - 1].brc.x) / 2, (rooms[n - 1].tlc.y + rooms[n - 1].brc.y) / 2 };
-        Point end = { (rooms[n].tlc.x + rooms[n].brc.x) / 2, (rooms[n].tlc.y + rooms[n].brc.y) / 2 };
+        Point start = get_centre_point(rooms[n - 1]);
+        Point end = get_centre_point(rooms[n]);
         dig_tunnel(start, end, map_def);
     }
 
     // Set player start position in first room
-    map_def.spawn_x = (rooms[0].tlc.x + rooms[0].brc.x) / 2;
-    map_def.spawn_y = (rooms[0].tlc.y + rooms[0].brc.y) / 2;
+    Point spawn = get_centre_point(rooms[0]);
+    map_def.spawn_x = spawn.x;
+    map_def.spawn_y = spawn.y;
 }

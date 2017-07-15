@@ -19,7 +19,7 @@
     <ClCompile Include="..\..\..\src\random.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\map_genarator.cpp">
+    <ClCompile Include="..\..\..\src\map_generator.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
