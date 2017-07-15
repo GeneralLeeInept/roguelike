@@ -152,6 +152,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\src\fov.cpp" />
     <ClCompile Include="..\..\..\src\main.cpp" />
     <ClCompile Include="..\..\..\src\map_generator.cpp" />
     <ClCompile Include="..\..\..\src\random.cpp" />
@@ -159,6 +160,7 @@
     <ClCompile Include="..\src\winmain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\fov.h" />
     <ClInclude Include="..\..\..\src\map_def.h" />
     <ClInclude Include="..\..\..\src\map_generator.h" />
     <ClInclude Include="..\..\..\src\random.h" />

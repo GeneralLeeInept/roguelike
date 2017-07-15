@@ -10,37 +10,132 @@ Fov::Fov(int range)
     _visibility.resize(max_tiles, true);
 }
 
-void Fov::update(int x, int y, const MapDef& map_def)
+void Fov::update(int view_x, int view_y, const MapDef& map_def)
 {
-    _pvs_min_x = std::max(x - _range, 0);
-    _pvs_max_x = std::min(x + _range, map_def.width);
-    _pvs_min_y = std::max(y - _range, 0);
-    _pvs_max_y = std::min(y + _range, map_def.height);
+    _pvs_min_x = std::max(view_x - _range, 0);
+    _pvs_max_x = std::min(view_x + _range, map_def.width);
+    _pvs_min_y = std::max(view_y - _range, 0);
+    _pvs_max_y = std::min(view_y + _range, map_def.height);
 
-    for (int y = _pvs_min_y; y < _pvs_max_y; ++y)
+    for (int tile_y = _pvs_min_y; tile_y < _pvs_max_y; ++tile_y)
     {
-        for (int x = _pvs_min_x; x < _pvs_max_x; ++x)
+        for (int tile_x = _pvs_min_x; tile_x < _pvs_max_x; ++tile_x)
         {
-            int index = tile_index(x, y);
-            _tiles[index] = (map_def.tiles[x + y * map_def.width].type == TileType::Wall);
+            int index = tile_index(tile_x, tile_y);
+            _tiles[index] = (map_def.tiles[tile_x + tile_y * map_def.width].type == TileType::Wall);
         }
     }
 
-    for (auto& v : _visibility)
+    for (auto& tile : _visibility)
     {
-        v = false;
+        tile = false;
     }
 
-    for (int ex = _pvs_min_x; ex < _pvs_max_x; ++ex)
+    // Cast rays to determine visible tiles
+    for (int end_x = _pvs_min_x; end_x < _pvs_max_x; ++end_x)
     {
-        cast_ray(x, y, ex, _pvs_min_y);
-        cast_ray(x, y, ex, _pvs_max_y - 1);
+        cast_ray(view_x, view_y, end_x, _pvs_min_y);
+        cast_ray(view_x, view_y, end_x, _pvs_max_y);
     }
 
-    for (int ey = _pvs_min_y; ey < _pvs_max_y; ++ey)
+    for (int end_y = _pvs_min_y + 1; end_y < _pvs_max_y - 1; ++end_y)
     {
-        cast_ray(x, y, _pvs_min_x, ey);
-        cast_ray(x, y, _pvs_max_x - 1, ey);
+        cast_ray(view_x, view_y, _pvs_min_x, end_y);
+        cast_ray(view_x, view_y, _pvs_max_x, end_y);
+    }
+
+    // Apply jice's post-process to fix artifacts
+    for (int tile_y = _pvs_min_y + 1; tile_y < _pvs_max_y - 1; ++tile_y)
+    {
+        for (int tile_x = _pvs_min_x + 1; tile_x < _pvs_max_x - 1; ++tile_x)
+        {
+            int index = tile_index(tile_x, tile_y);
+
+            if (!_tiles[index] && _visibility[index])
+            {
+                if (tile_x < view_x)
+                {
+                    if (tile_y < view_y)
+                    {
+                        index = tile_index(tile_x - 1, tile_y);
+                        if (_tiles[index]) _visibility[index] = true;
+                        index = tile_index(tile_x - 1, tile_y - 1);
+                        if (_tiles[index]) _visibility[index] = true;
+                        index = tile_index(tile_x, tile_y - 1);
+                        if (_tiles[index]) _visibility[index] = true;
+                    }
+                    else if (tile_y == view_y)
+                    {
+                        index = tile_index(tile_x - 1, tile_y - 1);
+                        if (_tiles[index]) _visibility[index] = true;
+                        index = tile_index(tile_x - 1, tile_y);
+                        if (_tiles[index]) _visibility[index] = true;
+                        index = tile_index(tile_x - 1, tile_y + 1);
+                        if (_tiles[index]) _visibility[index] = true;
+                    }
+                    else // tile_y > view_y
+                    {
+                        index = tile_index(tile_x - 1, tile_y);
+                        if (_tiles[index]) _visibility[index] = true;
+                        index = tile_index(tile_x - 1, tile_y + 1);
+                        if (_tiles[index]) _visibility[index] = true;
+                        index = tile_index(tile_x, tile_y + 1);
+                        if (_tiles[index]) _visibility[index] = true;
+                    }
+                }
+                else if (tile_x == view_x)
+                {
+                    if (tile_y < view_y)
+                    {
+                        index = tile_index(tile_x - 1, tile_y - 1);
+                        if (_tiles[index]) _visibility[index] = true;
+                        index = tile_index(tile_x, tile_y - 1);
+                        if (_tiles[index]) _visibility[index] = true;
+                        index = tile_index(tile_x + 1, tile_y - 1);
+                        if (_tiles[index]) _visibility[index] = true;
+                    }
+                    else if (tile_y > view_y)
+                    {
+                        index = tile_index(tile_x - 1, tile_y + 1);
+                        if (_tiles[index]) _visibility[index] = true;
+                        index = tile_index(tile_x, tile_y + 1);
+                        if (_tiles[index]) _visibility[index] = true;
+                        index = tile_index(tile_x + 1, tile_y + 1);
+                        if (_tiles[index]) _visibility[index] = true;
+                    }
+                }
+                else // tile_x > view_x
+                {
+                    if (tile_y < view_y)
+                    {
+                        index = tile_index(tile_x + 1, tile_y);
+                        if (_tiles[index]) _visibility[index] = true;
+                        index = tile_index(tile_x + 1, tile_y - 1);
+                        if (_tiles[index]) _visibility[index] = true;
+                        index = tile_index(tile_x, tile_y - 1);
+                        if (_tiles[index]) _visibility[index] = true;
+                    }
+                    else if (tile_y == view_y)
+                    {
+                        index = tile_index(tile_x + 1, tile_y - 1);
+                        if (_tiles[index]) _visibility[index] = true;
+                        index = tile_index(tile_x + 1, tile_y);
+                        if (_tiles[index]) _visibility[index] = true;
+                        index = tile_index(tile_x + 1, tile_y + 1);
+                        if (_tiles[index]) _visibility[index] = true;
+                    }
+                    else // tile_y > view_y
+                    {
+                        index = tile_index(tile_x + 1, tile_y);
+                        if (_tiles[index]) _visibility[index] = true;
+                        index = tile_index(tile_x + 1, tile_y + 1);
+                        if (_tiles[index]) _visibility[index] = true;
+                        index = tile_index(tile_x, tile_y + 1);
+                        if (_tiles[index]) _visibility[index] = true;
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -69,209 +164,65 @@ int Fov::tile_index(int x, int y) const
     return x + y * _range * 2;
 }
 
-/*
-  Octants for Bresenham
-
-        \3|2/
-        4\|/1
-       ---+----
-        5/|\0
-        /6|7\
-*/
-
-void to_octant0(int from_octant, int x, int y, int& ox, int& oy)
-{
-    switch (from_octant)
-    {
-        case 0:
-        {
-            ox = x;
-            oy = y;
-            break;
-        }
-        case 1:
-        {
-            ox = x;
-            oy = -y;
-            break;
-        }
-        case 2:
-        {
-            ox = -y;
-            oy = x;
-            break;
-        }
-        case 3:
-        {
-            ox = -y;
-            oy = -x;
-            break;
-        }
-        case 4:
-        {
-            ox = -x;
-            oy = -y;
-            break;
-        }
-        case 5:
-        {
-            ox = -x;
-            oy = y;
-            break;
-        }
-        case 6:
-        {
-            ox = y;
-            oy = -x;
-            break;
-        }
-        case 7:
-        {
-            ox = y;
-            oy = x;
-            break;
-        }
-    }
-}
-
-void from_octant0(int to_octant, int x, int y, int& ox, int& oy)
-{
-    switch (to_octant)
-    {
-        case 0:
-        {
-            ox = x;
-            oy = y;
-            break;
-        }
-        case 1:
-        {
-            ox = x;
-            oy = -y;
-            break;
-        }
-        case 2:
-        {
-            ox = y;
-            oy = -x;
-            break;
-        }
-        case 3:
-        {
-            ox = -y;
-            oy = -x;
-            break;
-        }
-        case 4:
-        {
-            ox = -x;
-            oy = -y;
-            break;
-        }
-        case 5:
-        {
-            ox = -x;
-            oy = y;
-            break;
-        }
-        case 6:
-        {
-            ox = -y;
-            oy = x;
-            break;
-        }
-        case 7:
-        {
-            ox = y;
-            oy = x;
-            break;
-        }
-    }
-}
-
 // Use Bresenham's algorithm to march along the ray marking tiles visible until
 // the end of the ray or a visibility barrier is reached
-void Fov::cast_ray(int sx, int sy, int ex, int ey)
+void Fov::cast_ray(int start_x, int start_y, int end_x, int end_y)
 {
-    int octant = 0;
+    int delta_x = end_x - start_x;
+    int delta_y = end_y - start_y;
+    int step_x = delta_x > 0 ? 1 : (delta_x < 0 ? -1 : 0);
+    int step_y = delta_y > 0 ? 1 : (delta_y < 0 ? -1 : 0);
 
-    if (ex >= sx)
+    if ((delta_x * step_x) > (delta_y * step_y))
     {
-        if (ey >= sy)
+        // tile_x-major
+        int y = start_y;
+        int error = 0;
+
+        for (int x = start_x; x != end_x; x += step_x)
         {
-            if ((ex - sx) >= (ey - sy))
+            int index = tile_index(x, y);
+
+            _visibility[index] = true;
+
+            if (_tiles[index])
             {
-                octant = 0;
+                return;
             }
-            else
+
+            error += step_y * delta_y;
+
+            if ((error * 2) >= step_x * delta_x)
             {
-                octant = 7;
-            }
-        }
-        else
-        {
-            if ((ex - sx) >= (sy - ey))
-            {
-                octant = 1;
-            }
-            else
-            {
-                octant = 2;
+                y += step_y;
+                error -= step_x * delta_x;
             }
         }
     }
     else
     {
-        if (ey >= sy)
+        // tile_y-major
+        int x = start_x;
+        int error = 0;
+
+        for (int y = start_y; y != end_y; y += step_y)
         {
-            if ((sx - ex) > (ey - sy))
+            int index = tile_index(x, y);
+
+            _visibility[index] = true;
+
+            if (_tiles[index])
             {
-                octant = 5;
+                return;
             }
-            else
+
+            error += step_x * delta_x;
+
+            if ((error * 2) >= step_y * delta_y)
             {
-                octant = 6;
+                x += step_x;
+                error -= step_y * delta_y;
             }
-        }
-        else
-        {
-            if ((sx - ex) > (sy - ey))
-            {
-                octant = 4;
-            }
-            else
-            {
-                octant = 3;
-            }
-        }
-    }
-
-    int x0, y0;
-    int x1, y1;
-
-    to_octant0(octant, sx, sy, x0, y0);
-    to_octant0(octant, ex, ey, x1, y1);
-
-    int dx = x1 - x0, dy = y1 - y0, y = y0, eps = 0;
-
-    for (int x = x0; x <= x1; x++)
-    {
-        int tx, ty;
-        from_octant0(octant, x, y, tx, ty);
-        int index = tile_index(tx, ty);
-        _visibility[index] = true;
-
-        if (_tiles[index])
-        {
-            return;
-        }
-
-        eps += dy;
-
-        if ((eps * 2) >= dx)
-        {
-            y++;
-            eps -= dx;
         }
     }
 }
