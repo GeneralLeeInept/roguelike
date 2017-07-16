@@ -44,7 +44,7 @@ void Fov::update(int view_x, int view_y, const MapDef& map_def)
         cast_ray(view_x, view_y, _pvs_max_x, end_y);
     }
 
-    // Apply jice's post-process to fix artifacts
+    // Apply jice's post-process to fix artefacts
     for (int tile_y = _pvs_min_y + 1; tile_y < _pvs_max_y - 1; ++tile_y)
     {
         for (int tile_x = _pvs_min_x + 1; tile_x < _pvs_max_x - 1; ++tile_x)
