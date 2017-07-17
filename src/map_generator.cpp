@@ -16,13 +16,13 @@ struct Rect
 
 static bool overlap(const Rect& r1, const Rect& r2)
 {
-    if ((r1.tlc.x - r2.brc.x) > 1 || (r2.tlc.x - r1.brc.x) > 1)
+    if ((r1.tlc.x - r2.brc.x) > 3 || (r2.tlc.x - r1.brc.x) > 3)
     {
         // No overlap in x
         return false;
     }
 
-    if ((r1.tlc.y - r2.brc.y) > 1 || (r2.tlc.y - r1.brc.y) > 1)
+    if ((r1.tlc.y - r2.brc.y) > 3 || (r2.tlc.y - r1.brc.y) > 3)
     {
         // No overlap in y
         return false;
@@ -179,21 +179,4 @@ void BasicMapGenerator::generate_map(int width, int height, MapDef& map_def)
     Point spawn = get_centre_point(rooms[0]);
     map_def.spawn_x = spawn.x;
     map_def.spawn_y = spawn.y;
-}
-
-void FovTestMapGenerator::generate_map(int width, int height, MapDef& map_def)
-{
-    map_def.width = width;
-    map_def.height = height;
-    map_def.tiles.resize(width * height);
-
-    for (auto& t : map_def.tiles)
-    {
-        t.type = TileType::Wall;
-    }
-
-    map_def.spawn_x = width / 2;
-    map_def.spawn_y = height / 2;
-
-    map_def.tiles[map_def.spawn_x + map_def.spawn_y * width].type = TileType::Floor;
 }

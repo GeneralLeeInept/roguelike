@@ -9,15 +9,9 @@ struct MapDef;
 
 struct RendererMap
 {
-    struct Tile
-    {
-        int code;
-        color_t colour;
-    };
-
     int width;
     int height;
-    std::vector<Tile> tiles;
+    std::vector<int> tiles;
 };
 
 struct RendererActor
@@ -35,6 +29,8 @@ public:
     Renderer(const Renderer&) = delete;
     Renderer& operator=(const Renderer&) = delete;
 
+    void init();
+
     void map_create(const MapDef& map_def);
 
     typedef size_t ActorHandle;
@@ -45,6 +41,9 @@ public:
     void draw_game(const Fov &fov);
 
 private:
+    const MapDef* _map_def;
     std::unique_ptr<RendererMap> _map;
     std::vector<RendererActor> _actors;
+    color_t _lit_colour;
+    color_t _unlit_colour;
 };

@@ -27,9 +27,3 @@ private:
     int _room_min_size;
     int _room_max_size;
 };
-
-class FovTestMapGenerator : MapGenerator
-{
-public:
-    void generate_map(int width, int height, MapDef &map_def) override;
-};

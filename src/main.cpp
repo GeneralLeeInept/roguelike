@@ -59,9 +59,7 @@ void process_input()
 void init_map()
 {
     BasicMapGenerator generator;
-    generator.configure(100, 5, 11);
-
-    //FovTestMapGenerator generator;
+    generator.configure(100, 5, 7);
     generator.generate_map(SCREEN_WIDTH, SCREEN_HEIGHT, map_def);
     renderer.map_create(map_def);
 }
@@ -72,6 +70,8 @@ int main(int argc, char** argv)
     {
         return -1;
     }
+
+    renderer.init();
 
     terminal_set("window: title='Rogue Like One', size=" SCREEN_SIZE);
     terminal_set("font: ../Media/UbuntuMono-R.ttf, size=12");
