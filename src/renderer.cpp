@@ -1,14 +1,39 @@
 #include "renderer.h"
 
 #include <algorithm>
+#include <map>
 
 #include "fov.h"
 #include "map_def.h"
 
+class MapTileInfo
+{
+public:
+    MapTileInfo(int code, color_t lit_colour, color_t unlit_colour)
+        : _code(code)
+        , _lit_colour(lit_colour)
+        , _unlit_colour(unlit_colour)
+    {
+    }
+
+    MapTileInfo()
+        : MapTileInfo('?', color_from_argb(0xff, 0xff, 0, 0), color_from_argb(0xff, 0xff, 0, 0))
+    {
+    }
+
+    int _code;
+    color_t _lit_colour;
+    color_t _unlit_colour;
+};
+
+static std::map<TileType, MapTileInfo> _tile_render_info;
+
 void Renderer::init()
 {
-    _lit_colour = color_from_name("lighter orange");
-    _unlit_colour = color_from_name("dark grey");
+    // Can put this in a config file.
+    _tile_render_info[TileType::Empty] = { ' ', color_from_name("white"), color_from_name("white") };
+    _tile_render_info[TileType::Floor] = { '.', color_from_name("lighter orange"), color_from_name("dark grey") };
+    _tile_render_info[TileType::Wall] = { '#', color_from_name("lighter orange"), color_from_name("dark grey") };
 }
 
 void Renderer::map_create(const MapDef& map_def)
@@ -20,7 +45,7 @@ void Renderer::map_create(const MapDef& map_def)
     _map->height = map_def.height;
 
     size_t num_tiles = _map->width * _map->height;
-    _map->tiles.resize(num_tiles, static_cast<int>(' '));
+    _map->tiles.resize(num_tiles, TileType::Empty);
 }
 
 Renderer::ActorHandle Renderer::actor_create(int code, color_t colour)
@@ -41,7 +66,7 @@ void Renderer::actor_set_position(ActorHandle actor, int x, int y)
 void Renderer::draw_game(const Fov& fov)
 {
     // Update map according to fov
-    int* map_tile = &_map->tiles[0];
+    TileType* map_tile = &_map->tiles[0];
     const MapDef::Tile* def_tile = &_map_def->tiles[0];
 
     for (int y = 0; y < _map->height; ++y)
@@ -50,24 +75,7 @@ void Renderer::draw_game(const Fov& fov)
         {
             if (fov.can_see(x, y))
             {
-                switch (def_tile->type)
-                {
-                    case TileType::Floor:
-                    {
-                        *map_tile = static_cast<int>('.');
-                        break;
-                    }
-                    case TileType::Wall:
-                    {
-                        *map_tile = static_cast<int>('#');
-                        break;
-                    }
-                    default:
-                    {
-                        *map_tile = static_cast<int>('?');
-                        break;
-                    }
-                }
+                *map_tile = def_tile->type;
             }
 
             map_tile++;
@@ -84,21 +92,22 @@ void Renderer::draw_game(const Fov& fov)
     if (_map)
     {
         terminal_layer(0);
-        int* tile = &_map->tiles[0];
+        TileType* tile = &_map->tiles[0];
 
         for (int y = 0; y < view_height; ++y)
         {
             for (int x = 0; x < view_width; ++x, ++tile)
             {
+                MapTileInfo& info = _tile_render_info[*tile];
                 if (fov.can_see(x, y))
                 {
-                    terminal_color(_lit_colour);
+                    terminal_color(info._lit_colour);
                 }
                 else
                 {
-                    terminal_color(_unlit_colour);
+                    terminal_color(info._unlit_colour);
                 }
-                terminal_put(x, y, *tile);
+                terminal_put(x, y, info._code);
             }
         }
     }

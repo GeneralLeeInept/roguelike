@@ -1,17 +1,18 @@
 #pragma once
 #include <BearLibTerminal.h>
 
+#include "map_def.h"
+
 #include <memory>
 #include <vector>
 
 class Fov;
-struct MapDef;
 
 struct RendererMap
 {
     int width;
     int height;
-    std::vector<int> tiles;
+    std::vector<TileType> tiles;
 };
 
 struct RendererActor

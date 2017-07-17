@@ -33,25 +33,54 @@ void process_input()
     {
         int key = terminal_read();
 
+        int new_x = player_x;
+        int new_y = player_y;
+
         if (key == TK_CLOSE || key == TK_ESCAPE)
         {
             want_exit = true;
         }
-        else if (key == TK_UP && can_walk(player_x, player_y - 1))
+        else if (key == TK_UP || key == TK_KP_8)
         {
-            player_y -= 1;
+            new_y -= 1;
         }
-        else if (key == TK_DOWN && can_walk(player_x, player_y + 1))
+        else if (key == TK_PAGEUP || key == TK_KP_9)
         {
-            player_y += 1;
+            new_y -= 1;
+            new_x += 1;
         }
-        else if (key == TK_LEFT && can_walk(player_x - 1, player_y))
+        else if (key == TK_RIGHT || key == TK_KP_6)
         {
-            player_x -= 1;
+            new_x += 1;
         }
-        else if (key == TK_RIGHT && can_walk(player_x + 1, player_y))
+        else if (key == TK_PAGEDOWN || key == TK_KP_3)
         {
-            player_x += 1;
+            new_y += 1;
+            new_x += 1;
+        }
+        else if (key == TK_DOWN || key == TK_KP_2)
+        {
+            new_y += 1;
+        }
+        else if (key == TK_END || key == TK_KP_1)
+        {
+            new_y += 1;
+            new_x -= 1;
+        }
+        else if (key == TK_LEFT || key == TK_KP_4)
+        {
+            new_x -= 1;
+        }
+        else if (key == TK_HOME || key == TK_KP_7)
+        {
+            new_y -= 1;
+            new_x -= 1;
+        }
+
+        if ((new_x != player_x || new_y != player_y) && can_walk(new_x, new_y))
+        {
+            player_x = new_x;
+            player_y = new_y;
         }
     }
 }

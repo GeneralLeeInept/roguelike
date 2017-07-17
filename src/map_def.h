@@ -4,8 +4,9 @@
 
 enum class TileType : int8_t
 {
+    Empty,
     Floor,
-    Wall,
+    Wall
 };
 
 struct MapDef
