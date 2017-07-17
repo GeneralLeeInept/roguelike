@@ -1,4 +1,6 @@
 #pragma once
+#include "geometry.h"
+
 #include <cstdint>
 #include <vector>
 
@@ -16,9 +18,7 @@ struct MapDef
         TileType type;
     };
 
-    int width;
-    int height;
-    int spawn_x;
-    int spawn_y;
+    Point size;
+    Point spawn_position;
     std::vector<Tile> tiles;
 };

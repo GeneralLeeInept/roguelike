@@ -39,12 +39,9 @@ void Renderer::init()
 void Renderer::map_create(const MapDef& map_def)
 {
     _map_def = &map_def;
-
     _map.reset(new RendererMap);
-    _map->width = map_def.width;
-    _map->height = map_def.height;
-
-    size_t num_tiles = _map->width * _map->height;
+    _map->size = map_def.size;
+    size_t num_tiles = map_def.size.x * map_def.size.y;
     _map->tiles.resize(num_tiles, TileType::Empty);
 }
 
@@ -57,23 +54,24 @@ Renderer::ActorHandle Renderer::actor_create(int code, color_t colour)
     return _actors.size() - 1;
 }
 
-void Renderer::actor_set_position(ActorHandle actor, int x, int y)
+void Renderer::actor_set_position(ActorHandle actor, const Point& position)
 {
-    _actors[actor].x = x;
-    _actors[actor].y = y;
+    _actors[actor].position = position;
 }
 
 void Renderer::draw_game(const Fov& fov)
 {
+    terminal_clear();
+
     // Update map according to fov
     TileType* map_tile = &_map->tiles[0];
     const MapDef::Tile* def_tile = &_map_def->tiles[0];
 
-    for (int y = 0; y < _map->height; ++y)
+    for (int y = 0; y < _map->size.y; ++y)
     {
-        for (int x = 0; x < _map->width; ++x)
+        for (int x = 0; x < _map->size.x; ++x)
         {
-            if (fov.can_see(x, y))
+            if (fov.can_see(Point(x, y)))
             {
                 *map_tile = def_tile->type;
             }
@@ -83,32 +81,26 @@ void Renderer::draw_game(const Fov& fov)
         }
     }
 
-    int view_width = std::min(terminal_state(TK_WIDTH), _map ? _map->width : 0);
-    int view_height = std::min(terminal_state(TK_HEIGHT), _map ? _map->height : 0);
-
-    terminal_clear();
+    Point view_size(std::min(terminal_state(TK_WIDTH), _map->size.x), std::min(terminal_state(TK_HEIGHT), _map->size.y));
 
     // Draw map
-    if (_map)
-    {
-        terminal_layer(0);
-        TileType* tile = &_map->tiles[0];
+    terminal_layer(0);
+    TileType* tile = &_map->tiles[0];
 
-        for (int y = 0; y < view_height; ++y)
+    for (int y = 0; y < view_size.y; ++y)
+    {
+        for (int x = 0; x < view_size.x; ++x, ++tile)
         {
-            for (int x = 0; x < view_width; ++x, ++tile)
+            MapTileInfo& info = _tile_render_info[*tile];
+            if (fov.can_see(Point(x, y)))
             {
-                MapTileInfo& info = _tile_render_info[*tile];
-                if (fov.can_see(x, y))
-                {
-                    terminal_color(info._lit_colour);
-                }
-                else
-                {
-                    terminal_color(info._unlit_colour);
-                }
-                terminal_put(x, y, info._code);
+                terminal_color(info._lit_colour);
             }
+            else
+            {
+                terminal_color(info._unlit_colour);
+            }
+            terminal_put(x, y, info._code);
         }
     }
 
@@ -117,10 +109,10 @@ void Renderer::draw_game(const Fov& fov)
 
     for (auto actor : _actors)
     {
-        if (fov.can_see(actor.x, actor.y))
+        if (fov.can_see(actor.position))
         {
             terminal_color(actor.colour);
-            terminal_put(actor.x, actor.y, actor.code);
+            terminal_put(actor.position.x, actor.position.y, actor.code);
         }
     }
 }

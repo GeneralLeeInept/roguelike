@@ -10,17 +10,15 @@ class Fov;
 
 struct RendererMap
 {
-    int width;
-    int height;
+    Point size;
     std::vector<TileType> tiles;
 };
 
 struct RendererActor
 {
+    Point position;
     int code;
     color_t colour;
-    int x;
-    int y;
 };
 
 class Renderer
@@ -37,7 +35,7 @@ public:
     typedef size_t ActorHandle;
 
     ActorHandle actor_create(int code, color_t colour);
-    void actor_set_position(ActorHandle actor, int x, int y);
+    void actor_set_position(ActorHandle actor, const Point& postition);
 
     void draw_game(const Fov &fov);
 
