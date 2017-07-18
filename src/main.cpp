@@ -18,7 +18,7 @@
 
 MapDef map_def;
 Renderer renderer;
-Fov fov(8);
+Fov fov(4);
 Point player_position;
 bool want_exit;
 

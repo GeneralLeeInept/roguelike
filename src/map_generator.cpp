@@ -63,18 +63,16 @@ void BasicMapGenerator::generate_map(int width, int height, MapDef& map_def)
     }
 
     // Generate rooms
+    Random random;
     std::vector<Rectangle> rooms;
-    Random room_size(_room_min_size, _room_max_size);
-    Random room_origin_x(_room_min_size / 2 + 1, width - _room_min_size / 2 + 1);
-    Random room_origin_y(_room_min_size / 2 + 1, height - _room_min_size / 2 + 1);
 
     for (int n = 0; n < _max_rooms; ++n)
     {
         // Add a room
-        int w = room_size();
-        int h = room_size();
-        int x = room_origin_x();
-        int y = room_origin_y();
+        int w = random(_room_min_size, _room_max_size);
+        int h = random(_room_min_size, _room_max_size);
+        int x = random(_room_min_size / 2 + 1, width - _room_min_size / 2 + 1);
+        int y = random(_room_min_size / 2 + 1, height - _room_min_size / 2 + 1);
         Rectangle room = Rectangle::intersection(Rectangle(Point(1, 1), map_def.size - Point(1, 1)), Rectangle(Point(x, y), w, h));
         bool keep = true;
 

@@ -1,54 +1,41 @@
-#include "random.h"
-
 #include <BearLibTerminal.h>
 
-Random::Random(int range)
-    : Random(1, range)
-{
-}
+#include "random.h"
 
-Random::Random(int min, int max)
-    : _distribution(min, max)
+Random::Random()
+    : _distribution()
     , _generator(std::random_device{}())
 {
 }
 
-int Random::operator()()
+int Random::operator()(int min, int max)
 {
+    std::uniform_int_distribution<>::param_type param(min, max);
+    _distribution.param(param);
     return _distribution(_generator);
 }
 
-static std::normal_distribution<>::param_type calculate_mean_sigma(int sides)
+static std::normal_distribution<>::param_type calculate_mean_sigma(int num_dice, int num_sides)
 {
-    double dsides = static_cast<double>(sides);
-    double mean = 1.0 + dsides * 0.5;
-    double variance = 0.0;
-
-    for (int i = 0; i < sides; i++)
-    {
-        double distance_to_mean = i + 1.0 - mean;
-        variance += (distance_to_mean * distance_to_mean);
-    }
-
-    variance = variance / dsides;
-
+    double mean = num_sides * (num_sides + 1.0) * 0.5;
+    double variance = (num_sides * num_sides - 1.0) / 12.0;
     double sigma = std::sqrt(variance);
-
     return std::normal_distribution<>::param_type(mean, sigma);
 }
 
-Roller::Roller(int sides)
-    : _distribution(calculate_mean_sigma(sides))
+Roller::Roller()
+    : _distribution()
     , _generator(std::random_device{}())
-    , _sides(sides)
 {
 }
 
-int Roller::operator()()
+int Roller::operator()(int num_dice, int num_sides)
 {
+    auto param = calculate_mean_sigma(num_dice, num_sides);
+    _distribution.param(param);
     int val = 0;
     
-    while (val < 1 || val > _sides)
+    while (val < num_dice || val > num_dice * num_sides)
     {
         val = static_cast<int>(std::floor(_distribution(_generator)));
     } 

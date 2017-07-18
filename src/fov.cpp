@@ -35,7 +35,7 @@ void Fov::update(const Point& view_position, const MapDef& map_def)
         cast_ray(view_position, Point(end_x, _pvs.maxs.y));
     }
 
-    for (int end_y = _pvs.mins.y + 1; end_y < _pvs.maxs.y - 1; ++end_y)
+    for (int end_y = _pvs.mins.y; end_y < _pvs.maxs.y; ++end_y)
     {
         cast_ray(view_position, Point(_pvs.mins.x, end_y));
         cast_ray(view_position, Point(_pvs.maxs.x, end_y));
@@ -172,7 +172,7 @@ void Fov::cast_ray(const Point& from, const Point& to)
 
     if ((delta_x * step_x) > (delta_y * step_y))
     {
-        // tile_x-major
+        // x-major
         int y = from.y;
         int error = 0;
 
@@ -198,7 +198,7 @@ void Fov::cast_ray(const Point& from, const Point& to)
     }
     else
     {
-        // tile_y-major
+        // y-major
         int x = from.x;
         int error = 0;
 
