@@ -8,19 +8,6 @@
 
 class Fov;
 
-struct RendererMap
-{
-    Point size;
-    std::vector<TileType> tiles;
-};
-
-struct RendererActor
-{
-    Point position;
-    int code;
-    color_t colour;
-};
-
 class Renderer
 {
 public:
@@ -34,15 +21,28 @@ public:
 
     typedef size_t ActorHandle;
 
-    ActorHandle actor_create(int code, color_t colour);
+    ActorHandle actor_create(MonsterType type, const Point& position);
     void actor_set_position(ActorHandle actor, const Point& postition);
 
     void draw_game(const Fov &fov);
 
 private:
+    struct Map
+    {
+        Point size;
+        std::vector<TileType> tiles;
+    };
+
+    struct Actor
+    {
+        Point position;
+        int code;
+        color_t colour;
+    };
+
     const MapDef* _map_def;
-    std::unique_ptr<RendererMap> _map;
-    std::vector<RendererActor> _actors;
+    std::unique_ptr<Map> _map;
+    std::vector<Actor> _actors;
     color_t _lit_colour;
     color_t _unlit_colour;
 };

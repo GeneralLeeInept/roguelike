@@ -1,9 +1,8 @@
 #pragma once
+#include "geometry.h"
+
 #include <algorithm>
-#include <chrono>
-#include <map>
 #include <random>
-#include <string>
 
 class Random
 {
@@ -12,6 +11,7 @@ public:
 
     // Generate a random number on the interval [min, max] with linear distribution.
     int operator()(int min, int max);
+    Point operator()(Point min, Point max);
 
 private:
     std::uniform_int_distribution<> _distribution;

@@ -2,8 +2,8 @@
 
 #include <algorithm>
 
-#include "geometry.h"
 #include "map_def.h"
+#include "random.h"
 
 static void dig_room(const Rectangle& room, MapDef& map_def)
 {
@@ -44,41 +44,29 @@ static void dig_tunnel(const Point& start, const Point& end, MapDef& map_def)
     }
 }
 
-void BasicMapGenerator::configure(int max_rooms, int room_min_size, int room_max_size)
+void BasicMapGenerator::generate_map(const MapGeneratorParameters& parameters, MapDef& map_def)
 {
-    _max_rooms = max_rooms;
-    _room_min_size = room_min_size;
-    _room_max_size = room_max_size;
-}
-
-void BasicMapGenerator::generate_map(int width, int height, MapDef& map_def)
-{
-    map_def.size = Point(width, height);
-    map_def.tiles.resize(width * height);
-
-    // Fill map with walls
-    for (auto& tile : map_def.tiles)
-    {
-        tile.type = TileType::Wall;
-    }
+    map_def.size = parameters.map_size;
+    size_t num_tiles = parameters.map_size.x * parameters.map_size.y;
+    map_def.tiles.resize(num_tiles, { TileType::Wall });
 
     // Generate rooms
     Random random;
     std::vector<Rectangle> rooms;
 
-    for (int n = 0; n < _max_rooms; ++n)
+    for (int n = 0; n < parameters.room_max; ++n)
     {
         // Add a room
-        int w = random(_room_min_size, _room_max_size);
-        int h = random(_room_min_size, _room_max_size);
-        int x = random(_room_min_size / 2 + 1, width - _room_min_size / 2 + 1);
-        int y = random(_room_min_size / 2 + 1, height - _room_min_size / 2 + 1);
-        Rectangle room = Rectangle::intersection(Rectangle(Point(1, 1), map_def.size - Point(1, 1)), Rectangle(Point(x, y), w, h));
+        int w = random(parameters.room_size_range.x, parameters.room_size_range.y);
+        int h = random(parameters.room_size_range.x, parameters.room_size_range.y);
+        int x = random(parameters.room_size_range.x / 2 + 1, parameters.map_size.x - parameters.room_size_range.x / 2 - 1);
+        int y = random(parameters.room_size_range.x / 2 + 1, parameters.map_size.y - parameters.room_size_range.x / 2 - 1);
+        Rectangle room = Rectangle::intersection(Rectangle(Point(1, 1), parameters.map_size - Point(1, 1)), Rectangle(Point(x, y), w, h));
         bool keep = true;
 
         for (auto& r : rooms)
         {
-            if (!Rectangle::separated(r, room, 5))
+            if (!Rectangle::separated(r, room, parameters.room_min_spacing))
             {
                 keep = false;
                 break;
@@ -107,4 +95,33 @@ void BasicMapGenerator::generate_map(int width, int height, MapDef& map_def)
 
     // Set player start position in first room
     map_def.spawn_position = rooms[0].centre();
+
+    // Add monsters in remaining rooms
+    for (size_t n = 1; n < rooms.size(); ++n)
+    {
+        for (int m = 0; m < parameters.monsters_max_per_room; ++m)
+        {
+            MapDef::Monster monster = {};
+            monster.spawn_pos = random(rooms[n].mins + Point(1, 1), rooms[n].maxs - Point(1,1));
+            int monster_type = random(1, 100);
+
+            if (monster_type < 51)
+            {
+                // 50% of the time no monster
+                continue;
+            }
+            else if (monster_type < 91)
+            {
+                // 40% of the time a weak monster
+                monster.type = MonsterType::Weak;
+            }
+            else
+            {
+                // 10% of the time a strong monster
+                monster.type = MonsterType::Strong;
+            }
+
+            map_def.monsters.push_back(monster);
+        }
+    }
 }

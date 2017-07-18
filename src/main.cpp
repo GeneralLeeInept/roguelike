@@ -16,11 +16,31 @@
 #define STRINGIZE2(s_) #s_
 #define SCREEN_SIZE STRINGIZE(SCREEN_WIDTH) "x" STRINGIZE(SCREEN_HEIGHT)
 
+class Player
+{
+public:
+    Player()
+        : fov(4)
+    {
+    }
+
+    Renderer::ActorHandle renderer_handle;
+    Point position;
+    Fov fov;
+};
+
+struct Monster
+{
+    Renderer::ActorHandle renderer_handle;
+    MonsterType type;
+    Point position;
+};
+
 MapDef map_def;
 Renderer renderer;
-Fov fov(4);
-Point player_position;
 bool want_exit;
+Player player;
+std::vector<Monster> monsters;
 
 bool can_walk(const Point& position)
 {
@@ -33,7 +53,7 @@ void process_input()
     {
         int key = terminal_read();
 
-        Point new_position = player_position;
+        Point new_position = player.position;
 
         if (key == TK_CLOSE || key == TK_ESCAPE)
         {
@@ -76,18 +96,23 @@ void process_input()
             new_position.x -= 1;
         }
 
-        if (new_position != player_position && can_walk(new_position))
+        if (new_position != player.position && can_walk(new_position))
         {
-            player_position = new_position;
+            player.position = new_position;
         }
     }
 }
 
 void init_map()
 {
+    MapGeneratorParameters generator_parameters = {};
+    generator_parameters.map_size = Point(SCREEN_WIDTH, SCREEN_HEIGHT);
+    generator_parameters.room_max = 100;
+    generator_parameters.room_size_range = Point(7, 9);
+    generator_parameters.room_min_spacing = 5;
+    generator_parameters.monsters_max_per_room = 5;
     BasicMapGenerator generator;
-    generator.configure(50, 7, 9);
-    generator.generate_map(SCREEN_WIDTH, SCREEN_HEIGHT, map_def);
+    generator.generate_map(generator_parameters, map_def);
     renderer.map_create(map_def);
 }
 
@@ -105,16 +130,24 @@ int main(int argc, char** argv)
 
     init_map();
 
-    player_position = map_def.spawn_position;
-    want_exit = false;
+    for (auto& monster_def : map_def.monsters)
+    {
+        Monster monster;
+        monster.type = monster_def.type;
+        monster.position = monster_def.spawn_pos;
+        monster.renderer_handle = renderer.actor_create(monster.type, monster.position);
+    }
 
-    Renderer::ActorHandle player = renderer.actor_create('@', color_from_name("white"));
+    player.position = map_def.spawn_position;
+    player.renderer_handle = renderer.actor_create(MonsterType::Player, player.position);
+
+    want_exit = false;
 
     while (!want_exit)
     {
-        renderer.actor_set_position(player, player_position);
-        fov.update(player_position, map_def);
-        renderer.draw_game(fov);
+        renderer.actor_set_position(player.renderer_handle, player.position);
+        player.fov.update(player.position, map_def);
+        renderer.draw_game(player.fov);
         terminal_refresh();
         process_input();
     }

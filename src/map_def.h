@@ -11,6 +11,13 @@ enum class TileType : int8_t
     Wall
 };
 
+enum class MonsterType : int8_t
+{
+    Player,
+    Weak,
+    Strong
+};
+
 struct MapDef
 {
     struct Tile
@@ -18,7 +25,14 @@ struct MapDef
         TileType type;
     };
 
+    struct Monster
+    {
+        MonsterType type;
+        Point spawn_pos;
+    };
+
     Point size;
     Point spawn_position;
     std::vector<Tile> tiles;
+    std::vector<Monster> monsters;
 };

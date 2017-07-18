@@ -15,6 +15,11 @@ int Random::operator()(int min, int max)
     return _distribution(_generator);
 }
 
+Point Random::operator()(Point min, Point max)
+{
+    return Point(operator()(min.x, max.x), operator()(min.y, max.y));
+}
+
 static std::normal_distribution<>::param_type calculate_mean_sigma(int num_dice, int num_sides)
 {
     double mean = num_sides * (num_sides + 1.0) * 0.5;

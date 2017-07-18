@@ -6,18 +6,18 @@
 #include "fov.h"
 #include "map_def.h"
 
-class MapTileInfo
+class TileRenderInfo
 {
 public:
-    MapTileInfo(int code, color_t lit_colour, color_t unlit_colour)
+    TileRenderInfo(int code, color_t lit_colour, color_t unlit_colour)
         : _code(code)
         , _lit_colour(lit_colour)
         , _unlit_colour(unlit_colour)
     {
     }
 
-    MapTileInfo()
-        : MapTileInfo('?', color_from_argb(0xff, 0xff, 0, 0), color_from_argb(0xff, 0xff, 0, 0))
+    TileRenderInfo()
+        : TileRenderInfo('?', color_from_argb(0xff, 0xff, 0, 0xff), color_from_argb(0xff, 0xff, 0, 0xff))
     {
     }
 
@@ -26,7 +26,26 @@ public:
     color_t _unlit_colour;
 };
 
-static std::map<TileType, MapTileInfo> _tile_render_info;
+class MonsterRenderInfo
+{
+public:
+    MonsterRenderInfo(int code, color_t colour)
+        : _code(code)
+        , _colour(colour)
+    {
+    }
+
+    MonsterRenderInfo()
+        : MonsterRenderInfo('?', color_from_argb(0xff, 0xff, 0, 0))
+    {
+    }
+
+    int _code;
+    color_t _colour;
+};
+
+static std::map<TileType, TileRenderInfo> _tile_render_info;
+static std::map<MonsterType, MonsterRenderInfo> _monster_render_info;
 
 void Renderer::init()
 {
@@ -34,22 +53,27 @@ void Renderer::init()
     _tile_render_info[TileType::Empty] = { ' ', color_from_name("white"), color_from_name("white") };
     _tile_render_info[TileType::Floor] = { '.', color_from_name("lighter orange"), color_from_name("dark grey") };
     _tile_render_info[TileType::Wall] = { '#', color_from_name("lighter orange"), color_from_name("dark grey") };
+
+    _monster_render_info[MonsterType::Player] = { '@', color_from_name("white") };
+    _monster_render_info[MonsterType::Weak] = { 'm', color_from_name("light brown") };
+    _monster_render_info[MonsterType::Strong] = { 'M', color_from_name("dark red") };
 }
 
 void Renderer::map_create(const MapDef& map_def)
 {
     _map_def = &map_def;
-    _map.reset(new RendererMap);
+    _map.reset(new Map);
     _map->size = map_def.size;
     size_t num_tiles = map_def.size.x * map_def.size.y;
     _map->tiles.resize(num_tiles, TileType::Empty);
 }
 
-Renderer::ActorHandle Renderer::actor_create(int code, color_t colour)
+Renderer::ActorHandle Renderer::actor_create(MonsterType type, const Point& position)
 {
-    RendererActor actor;
-    actor.code = code;
-    actor.colour = colour;
+    Actor actor;
+    actor.code = _monster_render_info[type]._code;
+    actor.colour = _monster_render_info[type]._colour;
+    actor.position = position;
     _actors.push_back(actor);
     return _actors.size() - 1;
 }
@@ -91,7 +115,7 @@ void Renderer::draw_game(const Fov& fov)
     {
         for (int x = 0; x < view_size.x; ++x, ++tile)
         {
-            MapTileInfo& info = _tile_render_info[*tile];
+            TileRenderInfo& info = _tile_render_info[*tile];
             if (fov.can_see(Point(x, y)))
             {
                 terminal_color(info._lit_colour);
@@ -105,7 +129,7 @@ void Renderer::draw_game(const Fov& fov)
     }
 
     // Draw actors
-    terminal_layer(1);
+    terminal_layer(0);
 
     for (auto actor : _actors)
     {

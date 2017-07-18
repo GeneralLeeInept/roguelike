@@ -51,6 +51,11 @@ Point Rectangle::centre() const
     return (mins + maxs) / 2;
 }
 
+Point Rectangle::size() const
+{
+    return maxs - mins;
+}
+
 // Return true if r1 & r2 are separated by at least min_separation in both x & y
 bool Rectangle::separated(const Rectangle& r1, const Rectangle& r2, int min_separation)
 {
