@@ -29,22 +29,22 @@ void Fov::update(const Point& view_position, const MapDef& map_def)
     }
 
     // Cast rays to determine visible tiles
-    for (int end_x = _pvs.mins.x; end_x < _pvs.maxs.x; ++end_x)
+    for (int end_x = _pvs.mins.x; end_x <= _pvs.maxs.x; ++end_x)
     {
         cast_ray(view_position, Point(end_x, _pvs.mins.y));
         cast_ray(view_position, Point(end_x, _pvs.maxs.y));
     }
 
-    for (int end_y = _pvs.mins.y; end_y < _pvs.maxs.y; ++end_y)
+    for (int end_y = _pvs.mins.y; end_y <= _pvs.maxs.y; ++end_y)
     {
         cast_ray(view_position, Point(_pvs.mins.x, end_y));
         cast_ray(view_position, Point(_pvs.maxs.x, end_y));
     }
 
     // Apply jice's post-process to fix artefacts
-    for (int tile_y = _pvs.mins.y + 1; tile_y < _pvs.maxs.y - 1; ++tile_y)
+    for (int tile_y = _pvs.mins.y + 2; tile_y < _pvs.maxs.y - 2; ++tile_y)
     {
-        for (int tile_x = _pvs.mins.x + 1; tile_x < _pvs.maxs.x - 1; ++tile_x)
+        for (int tile_x = _pvs.mins.x + 2; tile_x < _pvs.maxs.x - 2; ++tile_x)
         {
             int index = tile_index(tile_x, tile_y);
 
