@@ -19,7 +19,7 @@ void Fov::update(const Point& view_position, const MapDef& map_def)
         for (int tile_x = _pvs.mins.x; tile_x < _pvs.maxs.x; ++tile_x)
         {
             int index = tile_index(tile_x, tile_y);
-            _tiles[index] = (map_def.tiles[tile_x + tile_y * map_def.size.x].type == TileType::Wall);
+            _tiles[index] = (map_def.tiles[tile_x + tile_y * map_def.size.x] == TileType::Wall);
         }
     }
 

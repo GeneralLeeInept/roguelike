@@ -11,7 +11,7 @@ static void dig_room(const Rectangle& room, MapDef& map_def)
     {
         for (int x = room.mins.x; x < room.maxs.x; ++x)
         {
-            map_def.tiles[x + y * map_def.size.x].type = TileType::Floor;
+            map_def.tiles[x + y * map_def.size.x] = TileType::Floor;
         }
     }
 }
@@ -28,19 +28,19 @@ static void dig_tunnel(const Point& start, const Point& end, MapDef& map_def)
 
     for (; tx != mx; tx += dx)
     {
-        map_def.tiles[tx + ty * map_def.size.x].type = TileType::Floor;
+        map_def.tiles[tx + ty * map_def.size.x] = TileType::Floor;
     }
 
     // Dig vertical from start y to end y
     for (; ty != end.y; ty += dy)
     {
-        map_def.tiles[tx + ty * map_def.size.x].type = TileType::Floor;
+        map_def.tiles[tx + ty * map_def.size.x] = TileType::Floor;
     }
 
     // Dig horizontal to end x
     for (; tx != end.x; tx += dx)
     {
-        map_def.tiles[tx + ty * map_def.size.x].type = TileType::Floor;
+        map_def.tiles[tx + ty * map_def.size.x] = TileType::Floor;
     }
 }
 
@@ -101,8 +101,8 @@ void BasicMapGenerator::generate_map(const MapGeneratorParameters& parameters, M
     {
         for (int m = 0; m < parameters.monsters_max_per_room; ++m)
         {
-            MapDef::Actor monster = {};
-            monster.spawn_pos = random(rooms[n].mins + Point(1, 1), rooms[n].maxs - Point(1,1));
+            ActorDef monster = {};
+            monster.spawn_position = random(rooms[n].mins + Point(1, 1), rooms[n].maxs - Point(1,1));
             int monster_type = random(1, 100);
 
             if (monster_type < 51)
@@ -114,11 +114,13 @@ void BasicMapGenerator::generate_map(const MapGeneratorParameters& parameters, M
             {
                 // 40% of the time a weak monster
                 monster.type = ActorType::WeakMonster;
+                monster.speed = 8;
             }
             else
             {
                 // 10% of the time a strong monster
                 monster.type = ActorType::StrongMonster;
+                monster.speed = 12;
             }
 
             map_def.actors.push_back(monster);

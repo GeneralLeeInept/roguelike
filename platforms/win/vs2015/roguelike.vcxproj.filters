@@ -54,5 +54,8 @@
     <ClInclude Include="..\..\..\src\actor.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\actor_def.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

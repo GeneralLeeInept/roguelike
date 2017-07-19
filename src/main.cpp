@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include "actor.h"
 #include "fov.h"
 #include "geometry.h"
 #include "map_def.h"
@@ -32,15 +33,6 @@ public:
     int speed;
 };
 
-struct Actor
-{
-    Renderer::ActorHandle renderer_handle;
-    ActorType type;
-    Point position;
-    int energy;
-    int speed;
-};
-
 MapDef map_def;
 Renderer renderer;
 bool want_exit = false;
@@ -49,7 +41,7 @@ std::vector<Actor> actors;
 
 bool can_walk(const Point& position)
 {
-    if (map_def.tiles[position.x + position.y * map_def.size.x].type == TileType::Wall)
+    if (map_def.tiles[position.x + position.y * map_def.size.x] == TileType::Wall)
     {
         return false;
     }
@@ -145,12 +137,11 @@ void spawn_actors()
 
     for (auto& monster_def : map_def.actors)
     {
-        Actor monster;
-        monster.type = monster_def.type;
-        monster.position = monster_def.spawn_pos;
-        monster.renderer_handle = renderer.actor_create(monster.type, monster.position);
+        Actor monster(monster_def);
+        monster.position = monster_def.spawn_position;
+        monster.renderer_handle = renderer.actor_create(monster_def.type, monster.position);
         monster.energy = 0;
-        monster.speed = monster_def.type == ActorType::StrongMonster ? 12 : 8; //monster_def.speed;
+        monster.speed = monster_def.speed;
         actors.push_back(monster);
     }
 }

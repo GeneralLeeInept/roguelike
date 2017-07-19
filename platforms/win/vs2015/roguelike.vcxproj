@@ -163,6 +163,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\actor.h" />
+    <ClInclude Include="..\..\..\src\actor_def.h" />
     <ClInclude Include="..\..\..\src\fov.h" />
     <ClInclude Include="..\..\..\src\geometry.h" />
     <ClInclude Include="..\..\..\src\map_def.h" />

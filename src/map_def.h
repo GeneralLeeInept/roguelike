@@ -1,5 +1,6 @@
 #pragma once
-#include "actor.h"
+
+#include "actor_def.h"
 #include "geometry.h"
 
 #include <cstdint>

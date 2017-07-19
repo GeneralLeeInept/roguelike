@@ -1,3 +1,5 @@
+#include <BearLibTerminal.h>
+
 #include "renderer.h"
 
 #include <algorithm>
@@ -5,12 +7,6 @@
 
 #include "fov.h"
 #include "map_def.h"
-struct Map
-{
-    Point size;
-    std::vector<TileType> tiles;
-};
-
 
 class TileRenderInfo
 {
@@ -95,7 +91,7 @@ void Renderer::draw_game(const Fov& fov)
 
     // Update map according to fov
     TileType* map_tile = &_map->tiles[0];
-    const MapDef::Tile* def_tile = &_map_def->tiles[0];
+    const TileType* def_tile = &_map_def->tiles[0];
 
     for (int y = 0; y < _map->size.y; ++y)
     {
@@ -103,7 +99,7 @@ void Renderer::draw_game(const Fov& fov)
         {
             if (fov.can_see(Point(x, y)))
             {
-                *map_tile = def_tile->type;
+                *map_tile = *def_tile;
             }
 
             map_tile++;

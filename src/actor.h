@@ -1,21 +1,8 @@
 #pragma once
 
+#include "actor_def.h"
 #include "geometry.h"
 #include "renderer.h"
-
-enum class ActorType : int8_t
-{
-    Player,
-    WeakMonster,
-    StrongMonster
-};
-
-struct ActorDef
-{
-    ActorType type;
-    Point spawn_position;
-    int speed;
-};
 
 class Actor
 {
@@ -27,7 +14,7 @@ public:
 
     virtual void update();
 
-    ActorDef* _def;
+    const ActorDef* _def;
     Point position;
     int speed;
     int energy;

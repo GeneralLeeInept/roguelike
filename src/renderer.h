@@ -1,4 +1,5 @@
 #pragma once
+#include "actor_def.h"
 #include "map_def.h"
 
 #include <memory>
@@ -27,6 +28,12 @@ public:
     void draw_game(const Fov &fov);
 
 private:
+    struct Map
+    {
+        Point size;
+        std::vector<TileType> tiles;
+    };
+
     struct Actor
     {
         Point position;
@@ -35,7 +42,7 @@ private:
     };
 
     const MapDef* _map_def;
-    std::unique_ptr<struct Map> _map;
+    std::unique_ptr<Map> _map;
     std::vector<Actor> _actors;
     color_t _lit_colour;
     color_t _unlit_colour;
