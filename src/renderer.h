@@ -21,7 +21,7 @@ public:
 
     typedef size_t ActorHandle;
 
-    ActorHandle actor_create(MonsterType type, const Point& position);
+    ActorHandle actor_create(ActorType type, const Point& position);
     void actor_set_position(ActorHandle actor, const Point& postition);
 
     void draw_game(const Fov &fov);

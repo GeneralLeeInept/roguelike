@@ -26,17 +26,17 @@ public:
     color_t _unlit_colour;
 };
 
-class MonsterRenderInfo
+class ActorRenderInfo
 {
 public:
-    MonsterRenderInfo(int code, color_t colour)
+    ActorRenderInfo(int code, color_t colour)
         : _code(code)
         , _colour(colour)
     {
     }
 
-    MonsterRenderInfo()
-        : MonsterRenderInfo('?', color_from_argb(0xff, 0xff, 0, 0))
+    ActorRenderInfo()
+        : ActorRenderInfo('?', color_from_argb(0xff, 0xff, 0, 0))
     {
     }
 
@@ -45,7 +45,7 @@ public:
 };
 
 static std::map<TileType, TileRenderInfo> _tile_render_info;
-static std::map<MonsterType, MonsterRenderInfo> _monster_render_info;
+static std::map<ActorType, ActorRenderInfo> _actor_render_info;
 
 void Renderer::init()
 {
@@ -54,9 +54,9 @@ void Renderer::init()
     _tile_render_info[TileType::Floor] = { '.', color_from_name("lighter orange"), color_from_name("dark grey") };
     _tile_render_info[TileType::Wall] = { '#', color_from_name("lighter orange"), color_from_name("dark grey") };
 
-    _monster_render_info[MonsterType::Player] = { '@', color_from_name("white") };
-    _monster_render_info[MonsterType::Weak] = { 'm', color_from_name("light brown") };
-    _monster_render_info[MonsterType::Strong] = { 'M', color_from_name("dark red") };
+    _actor_render_info[ActorType::Player] = { '@', color_from_name("white") };
+    _actor_render_info[ActorType::Weak] = { 'm', color_from_name("light brown") };
+    _actor_render_info[ActorType::Strong] = { 'M', color_from_name("dark red") };
 }
 
 void Renderer::map_create(const MapDef& map_def)
@@ -68,11 +68,11 @@ void Renderer::map_create(const MapDef& map_def)
     _map->tiles.resize(num_tiles, TileType::Empty);
 }
 
-Renderer::ActorHandle Renderer::actor_create(MonsterType type, const Point& position)
+Renderer::ActorHandle Renderer::actor_create(ActorType type, const Point& position)
 {
     Actor actor;
-    actor.code = _monster_render_info[type]._code;
-    actor.colour = _monster_render_info[type]._colour;
+    actor.code = _actor_render_info[type]._code;
+    actor.colour = _actor_render_info[type]._colour;
     actor.position = position;
     _actors.push_back(actor);
     return _actors.size() - 1;

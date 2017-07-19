@@ -29,10 +29,10 @@ public:
     Fov fov;
 };
 
-struct Monster
+struct Actor
 {
     Renderer::ActorHandle renderer_handle;
-    MonsterType type;
+    ActorType type;
     Point position;
 };
 
@@ -40,7 +40,7 @@ MapDef map_def;
 Renderer renderer;
 bool want_exit;
 Player player;
-std::vector<Monster> monsters;
+std::vector<Actor> actorsparamLayout_onRemoveContainer;
 
 bool can_walk(const Point& position)
 {
@@ -130,16 +130,16 @@ int main(int argc, char** argv)
 
     init_map();
 
-    for (auto& monster_def : map_def.monsters)
+    for (auto& monster_def : map_def.actors)
     {
-        Monster monster;
+        Actor monster;
         monster.type = monster_def.type;
         monster.position = monster_def.spawn_pos;
         monster.renderer_handle = renderer.actor_create(monster.type, monster.position);
     }
 
     player.position = map_def.spawn_position;
-    player.renderer_handle = renderer.actor_create(MonsterType::Player, player.position);
+    player.renderer_handle = renderer.actor_create(ActorType::Player, player.position);
 
     want_exit = false;
 

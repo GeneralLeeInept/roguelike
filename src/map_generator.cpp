@@ -96,12 +96,12 @@ void BasicMapGenerator::generate_map(const MapGeneratorParameters& parameters, M
     // Set player start position in first room
     map_def.spawn_position = rooms[0].centre();
 
-    // Add monsters in remaining rooms
+    // Add actors in remaining rooms
     for (size_t n = 1; n < rooms.size(); ++n)
     {
         for (int m = 0; m < parameters.monsters_max_per_room; ++m)
         {
-            MapDef::Monster monster = {};
+            MapDef::Actor monster = {};
             monster.spawn_pos = random(rooms[n].mins + Point(1, 1), rooms[n].maxs - Point(1,1));
             int monster_type = random(1, 100);
 
@@ -113,15 +113,15 @@ void BasicMapGenerator::generate_map(const MapGeneratorParameters& parameters, M
             else if (monster_type < 91)
             {
                 // 40% of the time a weak monster
-                monster.type = MonsterType::Weak;
+                monster.type = ActorType::Weak;
             }
             else
             {
                 // 10% of the time a strong monster
-                monster.type = MonsterType::Strong;
+                monster.type = ActorType::Strong;
             }
 
-            map_def.monsters.push_back(monster);
+            map_def.actors.push_back(monster);
         }
     }
 }
