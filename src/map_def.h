@@ -1,4 +1,5 @@
 #pragma once
+#include "actor.h"
 #include "geometry.h"
 
 #include <cstdint>
@@ -11,28 +12,10 @@ enum class TileType : int8_t
     Wall
 };
 
-enum class ActorType : int8_t
-{
-    Player,
-    WeakMonster,
-    StrongMonster
-};
-
 struct MapDef
 {
-    struct Tile
-    {
-        TileType type;
-    };
-
-    struct Actor
-    {
-        ActorType type;
-        Point spawn_pos;
-    };
-
     Point size;
     Point spawn_position;
-    std::vector<Tile> tiles;
-    std::vector<Actor> actors;
+    std::vector<TileType> tiles;
+    std::vector<ActorDef> actors;
 };

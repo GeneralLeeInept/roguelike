@@ -5,6 +5,12 @@
 
 #include "fov.h"
 #include "map_def.h"
+struct Map
+{
+    Point size;
+    std::vector<TileType> tiles;
+};
+
 
 class TileRenderInfo
 {

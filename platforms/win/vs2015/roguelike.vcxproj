@@ -152,6 +152,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\src\actor.cpp" />
     <ClCompile Include="..\..\..\src\fov.cpp" />
     <ClCompile Include="..\..\..\src\geometry.cpp" />
     <ClCompile Include="..\..\..\src\main.cpp" />
@@ -161,6 +162,7 @@
     <ClCompile Include="..\src\winmain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\actor.h" />
     <ClInclude Include="..\..\..\src\fov.h" />
     <ClInclude Include="..\..\..\src\geometry.h" />
     <ClInclude Include="..\..\..\src\map_def.h" />
