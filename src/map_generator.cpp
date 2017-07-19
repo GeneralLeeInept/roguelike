@@ -113,12 +113,12 @@ void BasicMapGenerator::generate_map(const MapGeneratorParameters& parameters, M
             else if (monster_type < 91)
             {
                 // 40% of the time a weak monster
-                monster.type = ActorType::Weak;
+                monster.type = ActorType::WeakMonster;
             }
             else
             {
                 // 10% of the time a strong monster
-                monster.type = ActorType::Strong;
+                monster.type = ActorType::StrongMonster;
             }
 
             map_def.actors.push_back(monster);

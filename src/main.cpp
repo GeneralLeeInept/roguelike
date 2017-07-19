@@ -1,5 +1,6 @@
 #include <BearLibTerminal.h>
 
+#include <algorithm>
 #include <memory>
 #include <vector>
 
@@ -27,6 +28,8 @@ public:
     Renderer::ActorHandle renderer_handle;
     Point position;
     Fov fov;
+    int energy;
+    int speed;
 };
 
 struct Actor
@@ -34,76 +37,93 @@ struct Actor
     Renderer::ActorHandle renderer_handle;
     ActorType type;
     Point position;
+    int energy;
+    int speed;
 };
 
 MapDef map_def;
 Renderer renderer;
-bool want_exit;
+bool want_exit = false;
 Player player;
-std::vector<Actor> actorsparamLayout_onRemoveContainer;
+std::vector<Actor> actors;
 
 bool can_walk(const Point& position)
 {
-    return map_def.tiles[position.x + position.y * map_def.size.x].type == TileType::Floor;
+    if (map_def.tiles[position.x + position.y * map_def.size.x].type == TileType::Wall)
+    {
+        return false;
+    }
+
+    if (position == player.position)
+    {
+        return false;
+    }
+
+    for (auto& actor : actors)
+    {
+        if (position == actor.position)
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void process_input()
 {
-    if (terminal_has_input())
+    int key = terminal_read();
+
+    Point new_position = player.position;
+
+    if (key == TK_CLOSE || key == TK_ESCAPE)
     {
-        int key = terminal_read();
+        want_exit = true;
+    }
+    else if (key == TK_UP || key == TK_KP_8)
+    {
+        new_position.y -= 1;
+    }
+    else if (key == TK_PAGEUP || key == TK_KP_9)
+    {
+        new_position.y -= 1;
+        new_position.x += 1;
+    }
+    else if (key == TK_RIGHT || key == TK_KP_6)
+    {
+        new_position.x += 1;
+    }
+    else if (key == TK_PAGEDOWN || key == TK_KP_3)
+    {
+        new_position.y += 1;
+        new_position.x += 1;
+    }
+    else if (key == TK_DOWN || key == TK_KP_2)
+    {
+        new_position.y += 1;
+    }
+    else if (key == TK_END || key == TK_KP_1)
+    {
+        new_position.y += 1;
+        new_position.x -= 1;
+    }
+    else if (key == TK_LEFT || key == TK_KP_4)
+    {
+        new_position.x -= 1;
+    }
+    else if (key == TK_HOME || key == TK_KP_7)
+    {
+        new_position.y -= 1;
+        new_position.x -= 1;
+    }
 
-        Point new_position = player.position;
-
-        if (key == TK_CLOSE || key == TK_ESCAPE)
-        {
-            want_exit = true;
-        }
-        else if (key == TK_UP || key == TK_KP_8)
-        {
-            new_position.y -= 1;
-        }
-        else if (key == TK_PAGEUP || key == TK_KP_9)
-        {
-            new_position.y -= 1;
-            new_position.x += 1;
-        }
-        else if (key == TK_RIGHT || key == TK_KP_6)
-        {
-            new_position.x += 1;
-        }
-        else if (key == TK_PAGEDOWN || key == TK_KP_3)
-        {
-            new_position.y += 1;
-            new_position.x += 1;
-        }
-        else if (key == TK_DOWN || key == TK_KP_2)
-        {
-            new_position.y += 1;
-        }
-        else if (key == TK_END || key == TK_KP_1)
-        {
-            new_position.y += 1;
-            new_position.x -= 1;
-        }
-        else if (key == TK_LEFT || key == TK_KP_4)
-        {
-            new_position.x -= 1;
-        }
-        else if (key == TK_HOME || key == TK_KP_7)
-        {
-            new_position.y -= 1;
-            new_position.x -= 1;
-        }
-
-        if (new_position != player.position && can_walk(new_position))
-        {
-            player.position = new_position;
-        }
+    if (new_position != player.position && can_walk(new_position))
+    {
+        player.position = new_position;
     }
 }
 
-void init_map()
+void generate_map()
 {
     MapGeneratorParameters generator_parameters = {};
     generator_parameters.map_size = Point(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -114,6 +134,66 @@ void init_map()
     BasicMapGenerator generator;
     generator.generate_map(generator_parameters, map_def);
     renderer.map_create(map_def);
+}
+
+void spawn_actors()
+{
+    player.position = map_def.spawn_position;
+    player.renderer_handle = renderer.actor_create(ActorType::Player, player.position);
+    player.energy = 0;
+    player.speed = 10;
+
+    for (auto& monster_def : map_def.actors)
+    {
+        Actor monster;
+        monster.type = monster_def.type;
+        monster.position = monster_def.spawn_pos;
+        monster.renderer_handle = renderer.actor_create(monster.type, monster.position);
+        monster.energy = 0;
+        monster.speed = monster_def.type == ActorType::StrongMonster ? 12 : 8; //monster_def.speed;
+        actors.push_back(monster);
+    }
+}
+
+void run_game()
+{
+    generate_map();
+    spawn_actors();
+
+    player.fov.update(player.position, map_def);
+
+    // Game loop - angband style energy accumulation
+    while (!want_exit)
+    {
+        player.energy += player.speed;
+        if (player.energy >= 100)
+        {
+            player.energy -= 100;
+            process_input();
+            player.fov.update(player.position, map_def);
+            renderer.actor_set_position(player.renderer_handle, player.position);
+        }
+
+        for (auto& actor : actors)
+        {
+            actor.energy += actor.speed;
+            if (actor.energy >= 100)
+            {
+                actor.energy -= 100;
+                Point actor_move = player.position - actor.position;
+                actor_move.x = std::min(std::max(actor_move.x, -1), 1);
+                actor_move.y = std::min(std::max(actor_move.y, -1), 1);
+                if (can_walk(actor.position + actor_move))
+                {
+                    actor.position = actor.position + actor_move;
+                    renderer.actor_set_position(actor.renderer_handle, actor.position);
+                }
+            }
+        }
+
+        renderer.draw_game(player.fov);
+        terminal_refresh();
+    }
 }
 
 int main(int argc, char** argv)
@@ -128,29 +208,7 @@ int main(int argc, char** argv)
     terminal_set("window: title='Rogue Like One', size=" SCREEN_SIZE);
     terminal_set("font: ../Media/UbuntuMono-R.ttf, size=12");
 
-    init_map();
-
-    for (auto& monster_def : map_def.actors)
-    {
-        Actor monster;
-        monster.type = monster_def.type;
-        monster.position = monster_def.spawn_pos;
-        monster.renderer_handle = renderer.actor_create(monster.type, monster.position);
-    }
-
-    player.position = map_def.spawn_position;
-    player.renderer_handle = renderer.actor_create(ActorType::Player, player.position);
-
-    want_exit = false;
-
-    while (!want_exit)
-    {
-        renderer.actor_set_position(player.renderer_handle, player.position);
-        player.fov.update(player.position, map_def);
-        renderer.draw_game(player.fov);
-        terminal_refresh();
-        process_input();
-    }
+    run_game();
 
     terminal_close();
 

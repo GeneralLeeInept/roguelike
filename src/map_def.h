@@ -14,8 +14,8 @@ enum class TileType : int8_t
 enum class ActorType : int8_t
 {
     Player,
-    Weak,
-    Strong
+    WeakMonster,
+    StrongMonster
 };
 
 struct MapDef

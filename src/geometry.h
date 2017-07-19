@@ -16,6 +16,7 @@ Point operator+(const Point& a, const Point& b);
 Point operator-(const Point& a, const Point& b);
 Point operator*(const Point& a, int scale);
 Point operator/(const Point& a, int denom);
+bool operator==(const Point& a, const Point& b);
 bool operator!=(const Point& a, const Point& b);
 
 class Rectangle

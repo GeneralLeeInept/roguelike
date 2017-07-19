@@ -55,8 +55,8 @@ void Renderer::init()
     _tile_render_info[TileType::Wall] = { '#', color_from_name("lighter orange"), color_from_name("dark grey") };
 
     _actor_render_info[ActorType::Player] = { '@', color_from_name("white") };
-    _actor_render_info[ActorType::Weak] = { 'm', color_from_name("light brown") };
-    _actor_render_info[ActorType::Strong] = { 'M', color_from_name("dark red") };
+    _actor_render_info[ActorType::WeakMonster] = { 'm', color_from_name("light brown") };
+    _actor_render_info[ActorType::StrongMonster] = { 'M', color_from_name("dark red") };
 }
 
 void Renderer::map_create(const MapDef& map_def)

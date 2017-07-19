@@ -28,6 +28,11 @@ Point operator/(const Point& a, int denom)
     return Point(a.x / denom, a.y / denom);
 }
 
+bool operator==(const Point& a, const Point& b)
+{
+    return a.x == b.x && a.y == b.y;
+}
+
 bool operator!=(const Point& a, const Point& b)
 {
     return a.x != b.x || a.y != b.y;
