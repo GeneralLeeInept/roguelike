@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "actor.h"
+#include "dungeon.h"
 #include "fov.h"
 #include "geometry.h"
 #include "map_def.h"
@@ -35,9 +36,9 @@ public:
 
 MapDef map_def;
 Renderer renderer;
+Dungeon dungeon;
 bool want_exit = false;
 Player player;
-std::vector<Actor> actors;
 
 bool can_walk(const Point& position)
 {
@@ -51,12 +52,9 @@ bool can_walk(const Point& position)
         return false;
     }
 
-    for (auto& actor : actors)
+    if (dungeon.get_actor(position) != nullptr)
     {
-        if (position == actor.position)
-        {
-            return false;
-        }
+        return false;
     }
 
     return true;
@@ -125,33 +123,34 @@ void generate_map()
     generator_parameters.monsters_max_per_room = 5;
     BasicMapGenerator generator;
     generator.generate_map(generator_parameters, map_def);
-    renderer.map_create(map_def);
 }
 
 void spawn_actors()
 {
-    player.position = map_def.spawn_position;
-    player.renderer_handle = renderer.actor_create(ActorType::Player, player.position);
-    player.energy = 0;
-    player.speed = 10;
 
-    for (auto& monster_def : map_def.actors)
+}
+
+void init_renderer()
+{
+    renderer.map_create(map_def);
+
+    for (auto& actor : dungeon._actors)
     {
-        Actor monster(monster_def);
-        monster.position = monster_def.spawn_position;
-        monster.renderer_handle = renderer.actor_create(monster_def.type, monster.position);
-        monster.energy = 0;
-        monster.speed = monster_def.speed;
-        actors.push_back(monster);
-    }
+        actor.renderer_handle = renderer.actor_create(actor._def->type, actor.position);
+    }    
 }
 
 void run_game()
 {
     generate_map();
-    spawn_actors();
+    dungeon.init(map_def);
+    init_renderer();
 
+    player.position = map_def.spawn_position;
+    player.energy = 0;
+    player.speed = 10;
     player.fov.update(player.position, map_def);
+    player.renderer_handle = renderer.actor_create(ActorType::Player, player.position);
 
     // Game loop - angband style energy accumulation
     while (!want_exit)
@@ -165,7 +164,7 @@ void run_game()
             renderer.actor_set_position(player.renderer_handle, player.position);
         }
 
-        for (auto& actor : actors)
+        for (auto& actor : dungeon._actors)
         {
             actor.energy += actor.speed;
             if (actor.energy >= 100)
