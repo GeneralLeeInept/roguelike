@@ -4,6 +4,15 @@
 #include "geometry.h"
 #include "renderer.h"
 
+class Action
+{
+public:
+    Action(class Dungeon& dungeon);
+
+protected:
+    Dungeon* _dungeon;
+};
+
 class Actor
 {
 public:

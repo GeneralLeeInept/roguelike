@@ -10,6 +10,7 @@
 #include "geometry.h"
 #include "map_def.h"
 #include "map_generator.h"
+#include "player.h"
 #include "random.h"
 #include "renderer.h"
 
@@ -18,21 +19,6 @@
 #define STRINGIZE(s_) STRINGIZE2(s_)
 #define STRINGIZE2(s_) #s_
 #define SCREEN_SIZE STRINGIZE(SCREEN_WIDTH) "x" STRINGIZE(SCREEN_HEIGHT)
-
-class Player
-{
-public:
-    Player()
-        : fov(4)
-    {
-    }
-
-    Renderer::ActorHandle renderer_handle;
-    Point position;
-    Fov fov;
-    int energy;
-    int speed;
-};
 
 MapDef map_def;
 Renderer renderer;
@@ -123,11 +109,6 @@ void generate_map()
     generator_parameters.monsters_max_per_room = 5;
     BasicMapGenerator generator;
     generator.generate_map(generator_parameters, map_def);
-}
-
-void spawn_actors()
-{
-
 }
 
 void init_renderer()

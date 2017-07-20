@@ -158,6 +158,7 @@
     <ClCompile Include="..\..\..\src\geometry.cpp" />
     <ClCompile Include="..\..\..\src\main.cpp" />
     <ClCompile Include="..\..\..\src\map_generator.cpp" />
+    <ClCompile Include="..\..\..\src\player.cpp" />
     <ClCompile Include="..\..\..\src\random.cpp" />
     <ClCompile Include="..\..\..\src\renderer.cpp" />
     <ClCompile Include="..\src\winmain.cpp" />
@@ -170,6 +171,7 @@
     <ClInclude Include="..\..\..\src\geometry.h" />
     <ClInclude Include="..\..\..\src\map_def.h" />
     <ClInclude Include="..\..\..\src\map_generator.h" />
+    <ClInclude Include="..\..\..\src\player.h" />
     <ClInclude Include="..\..\..\src\random.h" />
     <ClInclude Include="..\..\..\src\renderer.h" />
   </ItemGroup>
