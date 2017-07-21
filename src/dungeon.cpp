@@ -13,6 +13,25 @@ void Dungeon::init(const MapDef& map_def)
     }
 }
 
+bool Dungeon::move_actor(Actor* actor, const Point& position)
+{
+    if (_map_def->tiles[position.x + position.y * _map_def->size.x] == TileType::Wall)
+    {
+        return false;
+    }
+
+    const Actor* other_actor = get_actor(position);
+    
+    if (other_actor && other_actor != actor)
+    {
+        return false;
+    }
+
+    actor->set_position(position);
+
+    return true;
+}
+
 Actor* Dungeon::get_actor(const Point& position)
 {
     for (auto& actor : _actors)

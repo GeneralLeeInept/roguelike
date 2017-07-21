@@ -1,5 +1,7 @@
 #include "actor.h"
 
+#include "action.h"
+
 Actor::Actor(const ActorDef& def)
     : _def(&def)
     , _speed(0)
@@ -12,7 +14,13 @@ void Actor::update()
     _energy += _speed;
     if (_energy >= 100)
     {
-        _energy -= 100;
+        Action* action = get_next_action();
+        if (action)
+        {
+            _energy -= 100;
+            action->execute(this);
+            set_next_action(nullptr);
+        }
     }
 }
 
@@ -23,9 +31,7 @@ const ActorDef& Actor::get_def() const
 
 Action* Actor::get_next_action()
 {
-    Action* next = _next_action;
-    _next_action = nullptr;
-    return next;
+    return _next_action;
 }
 
 Point Actor::get_position() const

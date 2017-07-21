@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include "action.h"
 #include "actor.h"
 #include "dungeon.h"
 #include "fov.h"
@@ -26,76 +27,59 @@ Dungeon dungeon;
 bool want_exit = false;
 Player player;
 
-bool can_walk(const Point& position)
-{
-    if (map_def.tiles[position.x + position.y * map_def.size.x] == TileType::Wall)
-    {
-        return false;
-    }
-
-    if (position == player.get_position())
-    {
-        return false;
-    }
-
-    if (dungeon.get_actor(position) != nullptr)
-    {
-        return false;
-    }
-
-    return true;
-}
-
 void process_input()
 {
-    int key = terminal_read();
+    if (terminal_has_input())
+    {
+        int key = terminal_read();
 
-    Point new_position = player.get_position();
+        Point new_position = player.get_position();
 
-    if (key == TK_CLOSE || key == TK_ESCAPE)
-    {
-        want_exit = true;
-    }
-    else if (key == TK_UP || key == TK_KP_8)
-    {
-        new_position.y -= 1;
-    }
-    else if (key == TK_PAGEUP || key == TK_KP_9)
-    {
-        new_position.y -= 1;
-        new_position.x += 1;
-    }
-    else if (key == TK_RIGHT || key == TK_KP_6)
-    {
-        new_position.x += 1;
-    }
-    else if (key == TK_PAGEDOWN || key == TK_KP_3)
-    {
-        new_position.y += 1;
-        new_position.x += 1;
-    }
-    else if (key == TK_DOWN || key == TK_KP_2)
-    {
-        new_position.y += 1;
-    }
-    else if (key == TK_END || key == TK_KP_1)
-    {
-        new_position.y += 1;
-        new_position.x -= 1;
-    }
-    else if (key == TK_LEFT || key == TK_KP_4)
-    {
-        new_position.x -= 1;
-    }
-    else if (key == TK_HOME || key == TK_KP_7)
-    {
-        new_position.y -= 1;
-        new_position.x -= 1;
-    }
+        if (key == TK_CLOSE || key == TK_ESCAPE)
+        {
+            want_exit = true;
+        }
+        else if (key == TK_UP || key == TK_KP_8)
+        {
+            new_position.y -= 1;
+        }
+        else if (key == TK_PAGEUP || key == TK_KP_9)
+        {
+            new_position.y -= 1;
+            new_position.x += 1;
+        }
+        else if (key == TK_RIGHT || key == TK_KP_6)
+        {
+            new_position.x += 1;
+        }
+        else if (key == TK_PAGEDOWN || key == TK_KP_3)
+        {
+            new_position.y += 1;
+            new_position.x += 1;
+        }
+        else if (key == TK_DOWN || key == TK_KP_2)
+        {
+            new_position.y += 1;
+        }
+        else if (key == TK_END || key == TK_KP_1)
+        {
+            new_position.y += 1;
+            new_position.x -= 1;
+        }
+        else if (key == TK_LEFT || key == TK_KP_4)
+        {
+            new_position.x -= 1;
+        }
+        else if (key == TK_HOME || key == TK_KP_7)
+        {
+            new_position.y -= 1;
+            new_position.x -= 1;
+        }
 
-    if (new_position != player.get_position() && can_walk(new_position))
-    {
-        player.set_position(new_position);
+        if (new_position != player.get_position())
+        {
+            player.set_next_action(new MoveAction(dungeon, new_position));
+        }
     }
 }
 
@@ -119,7 +103,7 @@ void init_renderer()
     {
         Renderer::ActorHandle handle = renderer.actor_create(actor.get_def().type, actor.get_position());
         actor.set_renderer_handle(handle);
-    }    
+    }
 }
 
 void run_game()
@@ -161,6 +145,8 @@ int main(int argc, char** argv)
     {
         return -1;
     }
+
+    terminal_refresh();
 
     renderer.init();
 
