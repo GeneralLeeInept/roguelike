@@ -33,7 +33,7 @@ bool can_walk(const Point& position)
         return false;
     }
 
-    if (position == player.position)
+    if (position == player.get_position())
     {
         return false;
     }
@@ -50,7 +50,7 @@ void process_input()
 {
     int key = terminal_read();
 
-    Point new_position = player.position;
+    Point new_position = player.get_position();
 
     if (key == TK_CLOSE || key == TK_ESCAPE)
     {
@@ -93,9 +93,9 @@ void process_input()
         new_position.x -= 1;
     }
 
-    if (new_position != player.position && can_walk(new_position))
+    if (new_position != player.get_position() && can_walk(new_position))
     {
-        player.position = new_position;
+        player.set_position(new_position);
     }
 }
 
@@ -117,7 +117,8 @@ void init_renderer()
 
     for (auto& actor : dungeon._actors)
     {
-        actor.renderer_handle = renderer.actor_create(actor._def->type, actor.position);
+        Renderer::ActorHandle handle = renderer.actor_create(actor.get_def().type, actor.get_position());
+        actor.set_renderer_handle(handle);
     }    
 }
 
@@ -127,39 +128,26 @@ void run_game()
     dungeon.init(map_def);
     init_renderer();
 
-    player.position = map_def.spawn_position;
-    player.energy = 0;
-    player.speed = 10;
-    player.fov.update(player.position, map_def);
-    player.renderer_handle = renderer.actor_create(ActorType::Player, player.position);
+    player.set_position(map_def.spawn_position);
+    player.set_speed(10);
+    player.fov.update(player.get_position(), map_def);
+    Renderer::ActorHandle handle = renderer.actor_create(ActorType::Player, player.get_position());
+    player.set_renderer_handle(handle);
 
     // Game loop - angband style energy accumulation
     while (!want_exit)
     {
-        player.energy += player.speed;
-        if (player.energy >= 100)
-        {
-            player.energy -= 100;
-            process_input();
-            player.fov.update(player.position, map_def);
-            renderer.actor_set_position(player.renderer_handle, player.position);
-        }
+        process_input();
+
+        player.update();
+
+        player.fov.update(player.get_position(), map_def);
+        renderer.actor_set_position(player.get_renderer_handle(), player.get_position());
 
         for (auto& actor : dungeon._actors)
         {
-            actor.energy += actor.speed;
-            if (actor.energy >= 100)
-            {
-                actor.energy -= 100;
-                Point actor_move = player.position - actor.position;
-                actor_move.x = std::min(std::max(actor_move.x, -1), 1);
-                actor_move.y = std::min(std::max(actor_move.y, -1), 1);
-                if (can_walk(actor.position + actor_move))
-                {
-                    actor.position = actor.position + actor_move;
-                    renderer.actor_set_position(actor.renderer_handle, actor.position);
-                }
-            }
+            actor.update();
+            renderer.actor_set_position(actor.get_renderer_handle(), actor.get_position());
         }
 
         renderer.draw_game(player.fov);
