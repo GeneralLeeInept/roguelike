@@ -1,5 +1,7 @@
 ﻿#include "fov.h"
 
+#include "dungeon.h"
+
 #include <algorithm>
 
 Fov::Fov(int range)
@@ -10,16 +12,16 @@ Fov::Fov(int range)
     _visibility.resize(max_tiles, true);
 }
 
-void Fov::update(const Point& view_position, const MapDef& map_def)
+void Fov::update(const Point& view_position, const Dungeon& dungeon)
 {
-    _pvs = Rectangle::intersection(Rectangle(Point(0, 0), map_def.size), Rectangle(view_position, _range * 2, _range * 2));
+    _pvs = Rectangle::intersection(Rectangle(Point(0, 0), dungeon.get_size()), Rectangle(view_position, _range * 2, _range * 2));
 
     for (int tile_y = _pvs.mins.y; tile_y < _pvs.maxs.y; ++tile_y)
     {
         for (int tile_x = _pvs.mins.x; tile_x < _pvs.maxs.x; ++tile_x)
         {
             int index = tile_index(tile_x, tile_y);
-            _tiles[index] = (map_def.tiles[tile_x + tile_y * map_def.size.x] == TileType::Wall);
+            _tiles[index] = (dungeon.get_tile(tile_x, tile_y) == TileType::Wall);
         }
     }
 

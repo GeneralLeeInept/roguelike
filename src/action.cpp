@@ -1,10 +1,21 @@
 #include "action.h"
 
 #include "dungeon.h"
+#include "player.h"
 
 Action::Action(Dungeon& dungeon)
     : _dungeon(&dungeon)
 {
+}
+
+Player* Action::get_player()
+{
+    return _dungeon->get_player();
+}
+
+bool Action::move_actor(Actor* actor, const Point& new_position)
+{
+    return _dungeon->move_actor(actor, new_position);
 }
 
 MoveAction::MoveAction(class Dungeon& dungeon, Point new_position)
@@ -15,6 +26,20 @@ MoveAction::MoveAction(class Dungeon& dungeon, Point new_position)
 
 void MoveAction::execute(Actor* actor)
 {
-    _dungeon->move_actor(actor, _new_position);
+    move_actor(actor, _new_position);
 }
 
+SeekPlayer::SeekPlayer(Dungeon& dungeon)
+    : Action(dungeon)
+{
+}
+
+void SeekPlayer::execute(Actor* actor)
+{
+    Point target_position = get_player()->get_position();
+    Point current_position = actor->get_position();
+    Point move = target_position - current_position;
+    move.x = move.x > 0 ? 1 : (move.x < 0 ? -1 : 0);
+    move.y = move.y > 0 ? 1 : (move.y < 0 ? -1 : 0);
+    move_actor(actor, current_position + move);
+}

@@ -25,7 +25,6 @@ MapDef map_def;
 Renderer renderer;
 Dungeon dungeon;
 bool want_exit = false;
-Player player;
 
 void process_input()
 {
@@ -33,7 +32,7 @@ void process_input()
     {
         int key = terminal_read();
 
-        Point new_position = player.get_position();
+        Point new_position = dungeon.get_player()->get_position();
 
         if (key == TK_CLOSE || key == TK_ESCAPE)
         {
@@ -76,9 +75,9 @@ void process_input()
             new_position.x -= 1;
         }
 
-        if (new_position != player.get_position())
+        if (new_position != dungeon.get_player()->get_position())
         {
-            player.set_next_action(new MoveAction(dungeon, new_position));
+            dungeon.get_player()->set_next_action(new MoveAction(dungeon, new_position));
         }
     }
 }
@@ -99,10 +98,10 @@ void init_renderer()
 {
     renderer.map_create(map_def);
 
-    for (auto& actor : dungeon._actors)
+    for (auto& actor : dungeon.get_actors())
     {
-        Renderer::ActorHandle handle = renderer.actor_create(actor.get_def().type, actor.get_position());
-        actor.set_renderer_handle(handle);
+        Renderer::ActorHandle handle = renderer.actor_create(actor->get_def().type, actor->get_position());
+        actor->set_renderer_handle(handle);
     }
 }
 
@@ -112,29 +111,18 @@ void run_game()
     dungeon.init(map_def);
     init_renderer();
 
-    player.set_position(map_def.spawn_position);
-    player.set_speed(10);
-    player.fov.update(player.get_position(), map_def);
-    Renderer::ActorHandle handle = renderer.actor_create(ActorType::Player, player.get_position());
-    player.set_renderer_handle(handle);
-
     // Game loop - angband style energy accumulation
     while (!want_exit)
     {
         process_input();
 
-        player.update();
-
-        player.fov.update(player.get_position(), map_def);
-        renderer.actor_set_position(player.get_renderer_handle(), player.get_position());
-
-        for (auto& actor : dungeon._actors)
+        for (auto& actor : dungeon.get_actors())
         {
-            actor.update();
-            renderer.actor_set_position(actor.get_renderer_handle(), actor.get_position());
+            actor->update();
+            renderer.actor_set_position(actor->get_renderer_handle(), actor->get_position());
         }
 
-        renderer.draw_game(player.fov);
+        renderer.draw_game(dungeon.get_player()->get_fov());
         terminal_refresh();
     }
 }

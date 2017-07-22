@@ -3,14 +3,15 @@
 #include <vector>
 
 #include "geometry.h"
-#include "map_def.h"
+
+class Dungeon;
 
 class Fov
 {
 public:
     Fov(int range);
 
-    void update(const Point& view_position, const MapDef& map_def);
+    void update(const Point& view_position, const Dungeon& dungeon);
 
     bool can_see(const Point& position) const;
 

@@ -4,9 +4,9 @@
 
 Actor::Actor(const ActorDef& def)
     : _def(&def)
-    , _speed(0)
-    , _next_action(nullptr)
+    , _energy(0)
 {
+    set_speed(def.speed);
 }
 
 void Actor::update()
@@ -19,7 +19,7 @@ void Actor::update()
         {
             _energy -= 100;
             action->execute(this);
-            set_next_action(nullptr);
+            delete action;
         }
     }
 }
@@ -31,7 +31,7 @@ const ActorDef& Actor::get_def() const
 
 Action* Actor::get_next_action()
 {
-    return _next_action;
+    return nullptr;
 }
 
 Point Actor::get_position() const
@@ -47,12 +47,6 @@ Renderer::ActorHandle Actor::get_renderer_handle() const
 int Actor::get_speed() const
 {
     return _speed;
-}
-
-void Actor::set_next_action(Action* action)
-{
-    delete _next_action;
-    _next_action = action;
 }
 
 void Actor::set_position(const Point& position)
