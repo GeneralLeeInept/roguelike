@@ -29,3 +29,9 @@ class BasicMapGenerator : MapGenerator
 public:
     void generate_map(const MapGeneratorParameters& parameters, MapDef &map_def) override;
 };
+
+class TestMapGenerator : MapGenerator
+{
+public:
+    void generate_map(const MapGeneratorParameters& parameters, MapDef &map_def) override;
+};

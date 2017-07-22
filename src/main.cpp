@@ -90,7 +90,8 @@ void generate_map()
     generator_parameters.room_size_range = Point(7, 9);
     generator_parameters.room_min_spacing = 5;
     generator_parameters.monsters_max_per_room = 5;
-    BasicMapGenerator generator;
+    //BasicMapGenerator generator;
+    TestMapGenerator generator;
     generator.generate_map(generator_parameters, map_def);
 }
 

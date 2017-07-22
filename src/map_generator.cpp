@@ -102,7 +102,7 @@ void BasicMapGenerator::generate_map(const MapGeneratorParameters& parameters, M
         for (int m = 0; m < parameters.monsters_max_per_room; ++m)
         {
             ActorDef monster = {};
-            monster.spawn_position = random(rooms[n].mins + Point(1, 1), rooms[n].maxs - Point(1,1));
+            monster.spawn_position = random(rooms[n].mins + Point(1, 1), rooms[n].maxs - Point(1, 1));
             int monster_type = random(1, 100);
 
             if (monster_type < 51)
@@ -124,6 +124,53 @@ void BasicMapGenerator::generate_map(const MapGeneratorParameters& parameters, M
             }
 
             map_def.actors.push_back(monster);
+        }
+    }
+}
+
+void TestMapGenerator::generate_map(const MapGeneratorParameters& parameters, MapDef& map_def)
+{
+    static const char* test_data[] = {
+        "################################################################################",
+        "#                  #                                                           #",
+        "#                  #                                                           #",
+        "#       X          #                                                           #",
+        "#                  #                                                           #",
+        "################### ############################################################",
+        "#                  # #                                                         #",
+        "#                  ## #                                                        #",
+        "#                  # # #                                                       #",
+        "#                     # #                                                      #",
+        "#                      # #                                                     #",
+        "#                       # #                                                    #",
+        "#                                                                              #",
+        "#                                         ###                                  #",
+        "#        #              ##                ###                                  #",
+        "#                       ##                ###                                  #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                                #  #                          #",
+        "#                                                 ##                           #",
+        "#                                                #  #                          #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "################################################################################",
+    };
+
+    map_def.size.x = strlen(test_data[0]);
+    map_def.size.y = sizeof(test_data) / sizeof(test_data[0]);
+
+    for (int y = 0; y < map_def.size.y; ++y)
+    {
+        for (int x = 0; x < map_def.size.x; ++x)
+        {
+            map_def.tiles.push_back(test_data[y][x] == '#' ? TileType::Wall : TileType::Floor);
+
+            if (test_data[y][x] == 'X')
+            {
+                map_def.spawn_position = Point(x, y);
+            }
         }
     }
 }
