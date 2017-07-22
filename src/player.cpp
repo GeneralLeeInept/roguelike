@@ -12,7 +12,7 @@ ActorDef player_def =
 
 Player::Player(Dungeon& dungeon)
     : Actor(player_def)
-    , _fov(4)
+    , _fov(16)
     , _dungeon(&dungeon)
     , _next_action(nullptr)
 {

@@ -30,23 +30,19 @@ void Fov::update(const Point& view_position, const Dungeon& dungeon)
         tile = false;
     }
 
-    // Cast rays to determine visible tiles
-    for (int end_x = _pvs.mins.x; end_x <= _pvs.maxs.x; ++end_x)
+    for (int y = _pvs.mins.y; y < _pvs.maxs.y; ++y)
     {
-        cast_ray(view_position, Point(end_x, _pvs.mins.y));
-        cast_ray(view_position, Point(end_x, _pvs.maxs.y));
-    }
-
-    for (int end_y = _pvs.mins.y; end_y <= _pvs.maxs.y; ++end_y)
-    {
-        cast_ray(view_position, Point(_pvs.mins.x, end_y));
-        cast_ray(view_position, Point(_pvs.maxs.x, end_y));
+        for (int x = _pvs.mins.x; x < _pvs.maxs.x; ++x)
+        {
+            int index = tile_index(x, y);
+            _visibility[index] = dungeon.los_check(view_position, Point(x, y));
+        }
     }
 
     // Apply jice's post-process to fix artefacts
-    for (int tile_y = _pvs.mins.y + 2; tile_y < _pvs.maxs.y - 2; ++tile_y)
+    for (int tile_y = _pvs.mins.y + 1; tile_y < _pvs.maxs.y - 1; ++tile_y)
     {
-        for (int tile_x = _pvs.mins.x + 2; tile_x < _pvs.maxs.x - 2; ++tile_x)
+        for (int tile_x = _pvs.mins.x + 1; tile_x < _pvs.maxs.x - 1; ++tile_x)
         {
             int index = tile_index(tile_x, tile_y);
 
