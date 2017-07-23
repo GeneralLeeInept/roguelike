@@ -134,7 +134,7 @@ void TestMapGenerator::generate_map(const MapGeneratorParameters& parameters, Ma
         "################################################################################",
         "#                  #                                                           #",
         "#                  #                                                           #",
-        "#       X          #                                                           #",
+        "#       @          #                                                           #",
         "#                  #                                                           #",
         "################### ############################################################",
         "#                  # #                                                         #",
@@ -167,7 +167,7 @@ void TestMapGenerator::generate_map(const MapGeneratorParameters& parameters, Ma
         {
             map_def.tiles.push_back(test_data[y][x] == '#' ? TileType::Wall : TileType::Floor);
 
-            if (test_data[y][x] == 'X')
+            if (test_data[y][x] == '@')
             {
                 map_def.spawn_position = Point(x, y);
             }
