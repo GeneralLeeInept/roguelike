@@ -1,43 +1,26 @@
 #include "player.h"
 
 #include "action.h"
-#include "dungeon.h"
 
-ActorDef player_def =
-{
-    ActorType::Player,
-    Point(),
-    100
-};
+ActorDef player_def = { ActorType::Player, Point(), 100 };
 
 Player::Player(Dungeon& dungeon)
-    : Actor(player_def)
+    : Actor(player_def, dungeon)
     , _fov(16)
-    , _dungeon(&dungeon)
-    , _next_action(nullptr)
 {
+}
+
+bool Player::needs_input() const
+{
+    return !has_next_action();
 }
 
 void Player::update()
 {
-    Actor::update();
-    _fov.update(get_position(), *_dungeon);
+    _fov.update(get_position(), get_dungeon());
 }
 
-const Fov& Player::get_fov()
+const Fov& Player::get_fov() const
 {
     return _fov;
-}
-
-Action* Player::get_next_action()
-{
-    Action* action = _next_action;
-    _next_action = nullptr;
-    return action;
-}
-
-void Player::set_next_action(Action* action)
-{
-    delete _next_action;
-    _next_action = action;
 }

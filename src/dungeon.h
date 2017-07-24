@@ -20,7 +20,7 @@ public:
 
     Actor* get_actor(const Point& position) const;
     const std::vector<Actor*>& get_actors() const;
-    Player* get_player() const;
+    Player& get_player() const;
     Point get_size() const;
     TileType get_tile(int x, int y) const;
 

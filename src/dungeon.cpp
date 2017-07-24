@@ -18,9 +18,10 @@ void Dungeon::init(const MapDef& map_def)
 
     for (auto& monster_def : map_def.actors)
     {
-        Actor* monster = new Actor(monster_def);
+        Actor* monster = new Actor(monster_def, *this);
         monster->set_position(monster_def.spawn_position);
         monster->set_speed(monster_def.speed);
+        monster->set_thinker(new MeleeMonster(*monster));
         _actors.push_back(monster);
     }
 }
@@ -44,7 +45,7 @@ bool Dungeon::move_actor(Actor* actor, const Point& position)
     }
 
     const Actor* other_actor = get_actor(position);
-    
+
     if (other_actor && other_actor != actor)
     {
         return false;
@@ -73,9 +74,9 @@ const std::vector<Actor*>& Dungeon::get_actors() const
     return _actors;
 }
 
-Player* Dungeon::get_player() const
+Player& Dungeon::get_player() const
 {
-    return _player;
+    return *_player;
 }
 
 Point Dungeon::get_size() const

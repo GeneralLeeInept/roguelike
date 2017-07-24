@@ -17,7 +17,7 @@ public:
     virtual void execute(Actor* actor) = 0;
 
 protected:
-    Player* get_player();
+    Player& get_player();
     bool move_actor(Actor* actor, const Point& new_position);
 
 private:

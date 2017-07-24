@@ -134,7 +134,7 @@ void TestMapGenerator::generate_map(const MapGeneratorParameters& parameters, Ma
         "################################################################################",
         "#                  #                                                           #",
         "#                  #                                                           #",
-        "#       @          #                                                           #",
+        "#       @          #      m                                                    #",
         "#                  #                                                           #",
         "################### ############################################################",
         "#                  # #                                                         #",
@@ -145,7 +145,7 @@ void TestMapGenerator::generate_map(const MapGeneratorParameters& parameters, Ma
         "#                       # #                                                    #",
         "#                                                                              #",
         "#                                         ###                                  #",
-        "#        #              ##                ###                                  #",
+        "#        #              ##                ###   m                              #",
         "#                       ##                ###                                  #",
         "#                                                                              #",
         "#                                                                              #",
@@ -170,6 +170,22 @@ void TestMapGenerator::generate_map(const MapGeneratorParameters& parameters, Ma
             if (test_data[y][x] == '@')
             {
                 map_def.spawn_position = Point(x, y);
+            }
+            else if (test_data[y][x] == 'm')
+            {
+                ActorDef monster = {};
+                monster.spawn_position = Point(x, y);
+                monster.type = ActorType::WeakMonster;
+                monster.speed = 80;
+                map_def.actors.push_back(monster);
+            }
+            else if (test_data[y][x] == 'm')
+            {
+                ActorDef monster = {};
+                monster.spawn_position = Point(x, y);
+                monster.type = ActorType::StrongMonster;
+                monster.speed = 120;
+                map_def.actors.push_back(monster);
             }
         }
     }

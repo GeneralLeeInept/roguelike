@@ -162,6 +162,7 @@
     <ClCompile Include="..\..\..\src\player.cpp" />
     <ClCompile Include="..\..\..\src\random.cpp" />
     <ClCompile Include="..\..\..\src\renderer.cpp" />
+    <ClCompile Include="..\..\..\src\thinker.cpp" />
     <ClCompile Include="..\src\winmain.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -176,6 +177,7 @@
     <ClInclude Include="..\..\..\src\player.h" />
     <ClInclude Include="..\..\..\src\random.h" />
     <ClInclude Include="..\..\..\src\renderer.h" />
+    <ClInclude Include="..\..\..\src\thinker.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

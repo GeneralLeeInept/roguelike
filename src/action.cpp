@@ -8,7 +8,7 @@ Action::Action(Dungeon& dungeon)
 {
 }
 
-Player* Action::get_player()
+Player& Action::get_player()
 {
     return _dungeon->get_player();
 }
@@ -36,7 +36,7 @@ SeekPlayer::SeekPlayer(Dungeon& dungeon)
 
 void SeekPlayer::execute(Actor* actor)
 {
-    Point target_position = get_player()->get_position();
+    Point target_position = get_player().get_position();
     Point current_position = actor->get_position();
     Point move = target_position - current_position;
     move.x = move.x > 0 ? 1 : (move.x < 0 ? -1 : 0);

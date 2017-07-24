@@ -32,7 +32,8 @@ void process_input()
     {
         int key = terminal_read();
 
-        Point new_position = dungeon.get_player()->get_position();
+        Point player_position = dungeon.get_player().get_position();
+        Point new_position = player_position;
 
         if (key == TK_CLOSE || key == TK_ESCAPE)
         {
@@ -74,10 +75,14 @@ void process_input()
             new_position.y -= 1;
             new_position.x -= 1;
         }
-
-        if (new_position != dungeon.get_player()->get_position())
+        else if (key == TK_KP_5 || key == TK_COMMA)
         {
-            dungeon.get_player()->set_next_action(new MoveAction(dungeon, new_position));
+            dungeon.get_player().set_next_action(new MoveAction(dungeon, player_position));
+        }
+
+        if (new_position != player_position)
+        {
+            dungeon.get_player().set_next_action(new MoveAction(dungeon, new_position));
         }
     }
 }
@@ -113,17 +118,44 @@ void run_game()
     init_renderer();
 
     // Game loop - angband style energy accumulation
+    size_t current_actor = 0;
     while (!want_exit)
     {
         process_input();
 
-        for (auto& actor : dungeon.get_actors())
+        if (current_actor == 0)
         {
-            actor->update();
-            renderer.actor_set_position(actor->get_renderer_handle(), actor->get_position());
+            // Begin turn
+            for (auto& actor : dungeon.get_actors())
+            {
+                actor->gain_energy();
+            }
         }
 
-        renderer.draw_game(dungeon.get_player()->get_fov());
+        for ( ; current_actor < dungeon.get_actors().size(); ++current_actor)
+        {
+            Actor* actor = dungeon.get_actors().at(current_actor);
+
+            if (actor->can_act())
+            {
+                if (actor->needs_input())
+                {
+                    break;
+                }
+
+                actor->act();
+                renderer.actor_set_position(actor->get_renderer_handle(), actor->get_position());
+            }
+        }
+
+        if (current_actor >= dungeon.get_actors().size())
+        {
+            // End turn
+            current_actor = 0;
+        }
+
+        dungeon.get_player().update();
+        renderer.draw_game(dungeon.get_player().get_fov());
         terminal_refresh();
     }
 }
