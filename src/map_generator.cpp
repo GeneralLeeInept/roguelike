@@ -152,7 +152,7 @@ void TestMapGenerator::generate_map(const MapGeneratorParameters& parameters, Ma
         "#                                                                              #",
         "#                                                #  #                          #",
         "#                                                 ##                           #",
-        "#                                                #  #                          #",
+        "#                                                # M#                          #",
         "#                                                                              #",
         "#                                                                              #",
         "################################################################################",
@@ -179,7 +179,7 @@ void TestMapGenerator::generate_map(const MapGeneratorParameters& parameters, Ma
                 monster.speed = 80;
                 map_def.actors.push_back(monster);
             }
-            else if (test_data[y][x] == 'm')
+            else if (test_data[y][x] == 'M')
             {
                 ActorDef monster = {};
                 monster.spawn_position = Point(x, y);

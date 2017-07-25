@@ -117,22 +117,23 @@ void run_game()
     dungeon.init(map_def);
     init_renderer();
 
-    // Game loop - angband style energy accumulation
+    // Game loop
     size_t current_actor = 0;
+
     while (!want_exit)
     {
         process_input();
 
-        if (current_actor == 0)
-        {
-            // Begin turn
-            for (auto& actor : dungeon.get_actors())
-            {
-                actor->gain_energy();
-            }
-        }
+        // Start turn (TODO)
+        // * Everyone accumulates energy
+        // * Everyone thinks (await player input)
+        // * Everyone with enough energy to act rolls for initiative (?)
+        // * Sort everyone with enough energy to act according to their
+        //   initiative
+        // * Everyone _tries_ to act - if you take your turn late your
+        //   move might get screwed up by an early mover
 
-        for ( ; current_actor < dungeon.get_actors().size(); ++current_actor)
+        for (; current_actor < dungeon.get_actors().size(); ++current_actor)
         {
             Actor* actor = dungeon.get_actors().at(current_actor);
 
@@ -146,11 +147,17 @@ void run_game()
                 actor->act();
                 renderer.actor_set_position(actor->get_renderer_handle(), actor->get_position());
             }
+            else
+            {
+                actor->gain_energy();
+            }
         }
 
         if (current_actor >= dungeon.get_actors().size())
         {
-            // End turn
+            // End turn (TODO)
+            // * Wipe the dead from the board
+            // * Tick dungeon
             current_actor = 0;
         }
 

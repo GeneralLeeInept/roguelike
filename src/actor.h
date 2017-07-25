@@ -9,6 +9,19 @@ class Action;
 class Dungeon;
 class Thinker;
 
+class MeleeFighter
+{
+public:
+    MeleeFighter() = delete;
+    MeleeFighter(Actor& owner, int hp, int power, int defence);
+
+    int get_defence() const;
+    int get_hp() const;
+    int get_power() const;
+
+
+};
+
 class Actor
 {
 public:
