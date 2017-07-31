@@ -16,7 +16,8 @@ public:
     void init(const MapDef& map_def);
     void shutdown();
 
-    bool move_actor(Actor* actor, const Point& position);
+    bool move_actor(Actor& actor, const Point& position);
+    void remove_actor(Actor& actor);
 
     Actor* get_actor(const Point& position) const;
     const std::vector<Actor*>& get_actors() const;

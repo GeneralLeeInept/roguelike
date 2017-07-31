@@ -115,12 +115,18 @@ void BasicMapGenerator::generate_map(const MapGeneratorParameters& parameters, M
                 // 40% of the time a weak monster
                 monster.type = ActorType::WeakMonster;
                 monster.speed = 80;
+                monster.hp = 5;
+                monster.defence = 0;
+                monster.power = 2;
             }
             else
             {
                 // 10% of the time a strong monster
                 monster.type = ActorType::StrongMonster;
                 monster.speed = 120;
+                monster.hp = 20;
+                monster.defence = 2;
+                monster.power = 4;
             }
 
             map_def.actors.push_back(monster);
@@ -177,6 +183,9 @@ void TestMapGenerator::generate_map(const MapGeneratorParameters& parameters, Ma
                 monster.spawn_position = Point(x, y);
                 monster.type = ActorType::WeakMonster;
                 monster.speed = 80;
+                monster.hp = 5;
+                monster.defence = 0;
+                monster.power = 2;
                 map_def.actors.push_back(monster);
             }
             else if (test_data[y][x] == 'M')
@@ -185,6 +194,9 @@ void TestMapGenerator::generate_map(const MapGeneratorParameters& parameters, Ma
                 monster.spawn_position = Point(x, y);
                 monster.type = ActorType::StrongMonster;
                 monster.speed = 120;
+                monster.hp = 20;
+                monster.defence = 2;
+                monster.power = 4;
                 map_def.actors.push_back(monster);
             }
         }

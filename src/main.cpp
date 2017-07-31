@@ -155,9 +155,24 @@ void run_game()
 
         if (current_actor >= dungeon.get_actors().size())
         {
+            std::vector<Actor*> dead_actors;
+            for (auto& actor : dungeon.get_actors())
+            {
+                if (actor->get_fighter() && actor->get_fighter()->get_hp() <= 0)
+                {
+                    dead_actors.push_back(actor);
+                }
+            }
+
+            for (auto& actor : dead_actors)
+            {
+                renderer.actor_destroy(actor->get_renderer_handle());
+                dungeon.remove_actor(*actor);
+            }
+
             // End turn (TODO)
-            // * Wipe the dead from the board
             // * Tick dungeon
+
             current_actor = 0;
         }
 

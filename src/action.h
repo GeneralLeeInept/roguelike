@@ -14,11 +14,11 @@ public:
 
     virtual ~Action() = default;
 
-    virtual void execute(Actor* actor) = 0;
+    virtual void execute(Actor& actor) = 0;
 
 protected:
     Player& get_player();
-    bool move_actor(Actor* actor, const Point& new_position);
+    bool move_actor(Actor& actor, const Point& new_position);
 
 private:
     Dungeon* _dungeon;
@@ -29,7 +29,7 @@ class MoveAction : public Action
 public:
     MoveAction(Dungeon& dungeon, Point new_position);
 
-    void execute(Actor* actor) override;
+    void execute(Actor& actor) override;
 
 private:
     Point _new_position;
@@ -40,5 +40,5 @@ class SeekPlayer : public Action
 public:
     SeekPlayer(Dungeon& dungeon);
 
-    void execute(Actor* actor) override;
+    void execute(Actor& actor) override;
 };

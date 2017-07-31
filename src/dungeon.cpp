@@ -22,6 +22,7 @@ void Dungeon::init(const MapDef& map_def)
         monster->set_position(monster_def.spawn_position);
         monster->set_speed(monster_def.speed);
         monster->set_thinker(new MeleeMonster(*monster));
+        monster->set_fighter(new MeleeFighter(*monster, monster_def.hp, monster_def.power, monster_def.defence));
         _actors.push_back(monster);
     }
 }
@@ -37,7 +38,7 @@ void Dungeon::shutdown()
     _player = nullptr;
 }
 
-bool Dungeon::move_actor(Actor* actor, const Point& position)
+bool Dungeon::move_actor(Actor& actor, const Point& position)
 {
     if (get_tile(position.x, position.y) == TileType::Wall)
     {
@@ -46,14 +47,31 @@ bool Dungeon::move_actor(Actor* actor, const Point& position)
 
     const Actor* other_actor = get_actor(position);
 
-    if (other_actor && other_actor != actor)
+    if (other_actor && other_actor != &actor)
     {
         return false;
     }
 
-    actor->set_position(position);
+    actor.set_position(position);
 
     return true;
+}
+
+void Dungeon::remove_actor(Actor& actor)
+{
+    for (auto it = _actors.begin(); it != _actors.end(); ++it)
+    {
+        if (*it == &actor)
+        {
+            _actors.erase(it);
+            break;
+        }
+    }
+
+    if (&actor != _player)
+    {
+        delete &actor;
+    }
 }
 
 Actor* Dungeon::get_actor(const Point& position) const

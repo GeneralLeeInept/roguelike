@@ -76,8 +76,13 @@ Renderer::ActorHandle Renderer::actor_create(ActorType type, const Point& positi
     actor.code = _actor_render_info[type]._code;
     actor.colour = _actor_render_info[type]._colour;
     actor.position = position;
-    _actors.push_back(actor);
-    return _actors.size() - 1;
+    _actors[_next_actor_handle] = actor;
+    return _next_actor_handle++;
+}
+
+void Renderer::actor_destroy(ActorHandle actor)
+{
+    _actors.erase(actor);
 }
 
 void Renderer::actor_set_position(ActorHandle actor, const Point& position)
@@ -135,10 +140,10 @@ void Renderer::draw_game(const Fov& fov)
 
     for (auto actor : _actors)
     {
-        if (fov.can_see(actor.position))
+        if (fov.can_see(actor.second.position))
         {
-            terminal_color(actor.colour);
-            terminal_put(actor.position.x, actor.position.y, actor.code);
+            terminal_color(actor.second.colour);
+            terminal_put(actor.second.position.x, actor.second.position.y, actor.second.code);
         }
     }
 }
