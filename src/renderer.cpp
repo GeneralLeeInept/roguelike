@@ -52,13 +52,16 @@ static std::map<ActorType, ActorRenderInfo> _actor_render_info;
 void Renderer::init()
 {
     // Can put this in a config file.
-    _tile_render_info[TileType::Empty] = { ' ', color_from_name("white"), color_from_name("white") };
-    _tile_render_info[TileType::Floor] = { '.', color_from_name("lighter orange"), color_from_name("dark grey") };
-    _tile_render_info[TileType::Wall] = { '#', color_from_name("lighter orange"), color_from_name("dark grey") };
+    static const unsigned lit_colour = 0xffd7ac6a;
+    static const unsigned unlit_colour = 0xff6b6050;
 
-    _actor_render_info[ActorType::Player] = { '@', color_from_name("white") };
-    _actor_render_info[ActorType::WeakMonster] = { 'm', color_from_name("light brown") };
-    _actor_render_info[ActorType::StrongMonster] = { 'M', color_from_name("dark red") };
+    _tile_render_info[TileType::Empty] = { ' ', 0xff000000, 0xff000000 };
+    _tile_render_info[TileType::Floor] = { '.', lit_colour, unlit_colour };
+    _tile_render_info[TileType::Wall] = { '#', lit_colour, unlit_colour };
+
+    _actor_render_info[ActorType::Player] = { '@', 0xffc8c8c8 };
+    _actor_render_info[ActorType::WeakMonster] = { 'm', 0xffa85219 };
+    _actor_render_info[ActorType::StrongMonster] = { 'M', 0xffff2f42 };
 }
 
 void Renderer::map_create(const MapDef& map_def)
@@ -90,10 +93,47 @@ void Renderer::actor_set_position(ActorHandle actor, const Point& position)
     _actors[actor].position = position;
 }
 
-void Renderer::draw_game(const Fov& fov)
+void Renderer::draw_game(const Fov& fov, const Point& reference_point)
 {
-    terminal_clear();
+    Point screen_size(terminal_state(TK_WIDTH), terminal_state(TK_HEIGHT));
 
+    // Scroll to keep reference_point in the middle 1/3 of the screen
+    int bw = (screen_size.x - 26) / 3;
+    int bh = screen_size.y / 3;
+
+    Point screen_reference_point = reference_point - _map_scroll;
+
+    if (screen_reference_point.x < bw)
+    {
+        _map_scroll.x = reference_point.x - bw;
+    }
+
+    if (screen_reference_point.x > 2 * bw)
+    {
+        _map_scroll.x = reference_point.x - 2 * bw;
+    }
+
+    if (screen_reference_point.y < bh)
+    {
+        _map_scroll.y = reference_point.y - bh;
+    }
+
+    if (screen_reference_point.y > 2 * bh)
+    {
+        _map_scroll.y = reference_point.y - 2 * bh;
+    }
+
+    terminal_bkcolor(0xff252526);
+    terminal_clear_area(26, 0, screen_size.x, screen_size.y);
+
+    draw_map(fov, Rectangle(Point(26, 0), screen_size));
+
+    terminal_bkcolor(0xff333337);
+    terminal_clear_area(0, 0, 26, screen_size.y);
+}
+
+void Renderer::draw_map(const Fov& fov, const Rectangle& viewport)
+{
     // Update map according to fov
     TileType* map_tile = &_map->tiles[0];
     const TileType* def_tile = &_map_def->tiles[0];
@@ -112,18 +152,27 @@ void Renderer::draw_game(const Fov& fov)
         }
     }
 
-    Point view_size(std::min(terminal_state(TK_WIDTH), _map->size.x), std::min(terminal_state(TK_HEIGHT), _map->size.y));
-
     // Draw map
-    terminal_layer(0);
-    TileType* tile = &_map->tiles[0];
+    int tile_y = _map_scroll.y;
 
-    for (int y = 0; y < view_size.y; ++y)
+    for (int screen_y = viewport.mins.y; screen_y < viewport.maxs.y && tile_y < _map->size.y; ++screen_y, ++tile_y)
     {
-        for (int x = 0; x < view_size.x; ++x, ++tile)
+        int tile_x = _map_scroll.x;
+
+        if (tile_y < 0)
         {
-            TileRenderInfo& info = _tile_render_info[*tile];
-            if (fov.can_see(Point(x, y)))
+            continue;
+        }
+
+        for (int screen_x = viewport.mins.x; screen_x < viewport.maxs.x && tile_x < _map->size.x; ++screen_x, ++tile_x)
+        {
+            if (tile_x < 0)
+            {
+                continue;
+            }
+            TileRenderInfo& info = _tile_render_info[_map->tiles[tile_x + tile_y * _map->size.x]];
+
+            if (fov.can_see(Point(tile_x, tile_y)))
             {
                 terminal_color(info._lit_colour);
             }
@@ -131,19 +180,18 @@ void Renderer::draw_game(const Fov& fov)
             {
                 terminal_color(info._unlit_colour);
             }
-            terminal_put(x, y, info._code);
+
+            terminal_put(screen_x, screen_y, info._code);
         }
     }
 
     // Draw actors
-    terminal_layer(0);
-
     for (auto actor : _actors)
     {
         if (fov.can_see(actor.second.position))
         {
             terminal_color(actor.second.colour);
-            terminal_put(actor.second.position.x, actor.second.position.y, actor.second.code);
+            terminal_put(viewport.mins.x + actor.second.position.x - _map_scroll.x, viewport.mins.y + actor.second.position.y - _map_scroll.y, actor.second.code);
         }
     }
 }

@@ -15,8 +15,8 @@
 #include "random.h"
 #include "renderer.h"
 
-#define SCREEN_WIDTH 80
-#define SCREEN_HEIGHT 25
+#define SCREEN_WIDTH 160
+#define SCREEN_HEIGHT 50
 #define STRINGIZE(s_) STRINGIZE2(s_)
 #define STRINGIZE2(s_) #s_
 #define SCREEN_SIZE STRINGIZE(SCREEN_WIDTH) "x" STRINGIZE(SCREEN_HEIGHT)
@@ -90,10 +90,10 @@ void process_input()
 void generate_map()
 {
     MapGeneratorParameters generator_parameters = {};
-    generator_parameters.map_size = Point(SCREEN_WIDTH, SCREEN_HEIGHT);
+    generator_parameters.map_size = Point(100, 100);
     generator_parameters.room_max = 100;
-    generator_parameters.room_size_range = Point(7, 9);
-    generator_parameters.room_min_spacing = 5;
+    generator_parameters.room_size_range = Point(5, 14);
+    generator_parameters.room_min_spacing = 7;
     generator_parameters.monsters_max_per_room = 5;
     //BasicMapGenerator generator;
     TestMapGenerator generator;
@@ -177,7 +177,7 @@ void run_game()
         }
 
         dungeon.get_player().update();
-        renderer.draw_game(dungeon.get_player().get_fov());
+        renderer.draw_game(dungeon.get_player().get_fov(), dungeon.get_player().get_position());
         terminal_refresh();
     }
 }

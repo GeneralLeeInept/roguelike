@@ -39,7 +39,6 @@ public:
 
     void act();
     bool can_act() const;
-    void destroy();
     void gain_energy();
     bool has_next_action() const;
     virtual bool needs_input() const;

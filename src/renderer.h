@@ -1,5 +1,6 @@
 #pragma once
 #include "actor_def.h"
+#include "geometry.h"
 #include "map_def.h"
 
 #include <map>
@@ -26,7 +27,8 @@ public:
     void actor_destroy(ActorHandle actor);
     void actor_set_position(ActorHandle actor, const Point& postition);
 
-    void draw_game(const Fov &fov);
+    void draw_game(const Fov& fov, const Point& reference_point);
+    void draw_map(const Fov& fov, const Rectangle& viewport);
 
 private:
     struct Map
@@ -48,4 +50,5 @@ private:
     size_t _next_actor_handle;
     color_t _lit_colour;
     color_t _unlit_colour;
+    Point _map_scroll;
 };
