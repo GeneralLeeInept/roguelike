@@ -13,7 +13,7 @@ Player::Player(Dungeon& dungeon)
 
 bool Player::needs_input() const
 {
-    return !has_next_action();
+    return get_fighter()->get_hp() >= 0 && !has_next_action();
 }
 
 void Player::update()

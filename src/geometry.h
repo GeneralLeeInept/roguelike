@@ -29,6 +29,8 @@ public:
     Point centre() const;
     Point size() const;
 
+    bool contains(const Point& p) const;
+
     static bool separated(const Rectangle& r1, const Rectangle& r2, int min_separation = 0);
     static Rectangle intersection(const Rectangle& r1, const Rectangle& r2);
 

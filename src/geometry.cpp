@@ -61,6 +61,11 @@ Point Rectangle::size() const
     return maxs - mins;
 }
 
+bool Rectangle::contains(const Point& p) const
+{
+    return p.x >= mins.x && p.x < maxs.x && p.y >= mins.y && p.y < maxs.y;
+}
+
 // Return true if r1 & r2 are separated by at least min_separation in both x & y
 bool Rectangle::separated(const Rectangle& r1, const Rectangle& r2, int min_separation)
 {

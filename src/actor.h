@@ -45,6 +45,7 @@ public:
 
     const ActorDef& get_def() const;
     Dungeon& get_dungeon() const;
+    const MeleeFighter* get_fighter() const;
     MeleeFighter* get_fighter();
     Point get_position() const;
     Renderer::ActorHandle get_renderer_handle() const;

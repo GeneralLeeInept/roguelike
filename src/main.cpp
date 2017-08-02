@@ -25,6 +25,7 @@ MapDef map_def;
 Renderer renderer;
 Dungeon dungeon;
 bool want_exit = false;
+Renderer::StatusBarHandle status_bar_hp;
 
 void process_input()
 {
@@ -109,6 +110,8 @@ void init_renderer()
         Renderer::ActorHandle handle = renderer.actor_create(actor->get_def().type, actor->get_position());
         actor->set_renderer_handle(handle);
     }
+
+    status_bar_hp = renderer.status_bar_create(Rectangle(Point(2, 2), Point(24, 3)), 0, 20);
 }
 
 void run_game()
@@ -158,7 +161,7 @@ void run_game()
             std::vector<Actor*> dead_actors;
             for (auto& actor : dungeon.get_actors())
             {
-                if (actor->get_fighter() && actor->get_fighter()->get_hp() <= 0)
+                if (actor->get_fighter() && actor->get_fighter()->get_hp() < 0)
                 {
                     dead_actors.push_back(actor);
                 }
@@ -177,6 +180,7 @@ void run_game()
         }
 
         dungeon.get_player().update();
+        renderer.status_bar_set_value(status_bar_hp, dungeon.get_player().get_fighter()->get_hp());
         renderer.draw_game(dungeon.get_player().get_fov(), dungeon.get_player().get_position());
         terminal_refresh();
     }

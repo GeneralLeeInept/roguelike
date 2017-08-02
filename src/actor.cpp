@@ -98,6 +98,11 @@ Dungeon& Actor::get_dungeon() const
     return *_dungeon;
 }
 
+const MeleeFighter* Actor::get_fighter() const
+{
+    return _fighter.get();
+}
+
 MeleeFighter* Actor::get_fighter()
 {
     return _fighter.get();

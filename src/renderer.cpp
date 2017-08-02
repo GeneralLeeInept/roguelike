@@ -93,13 +93,32 @@ void Renderer::actor_set_position(ActorHandle actor, const Point& position)
     _actors[actor].position = position;
 }
 
+Renderer::StatusBarHandle Renderer::status_bar_create(const Rectangle& rectangle, int min_value, int max_value)
+{
+    StatusBar status_bar;
+    status_bar.rectangle = rectangle;
+    status_bar.min_value = min_value;
+    status_bar.max_value = max_value;
+    status_bar.value = max_value;
+    _status_bars[_next_status_bar_handle] = status_bar;
+    return _next_status_bar_handle++;
+}
+
+void Renderer::status_bar_set_value(StatusBarHandle handle, int value)
+{
+    StatusBar& status_bar = _status_bars[handle];
+    status_bar.value = value;
+}
+
 void Renderer::draw_game(const Fov& fov, const Point& reference_point)
 {
     Point screen_size(terminal_state(TK_WIDTH), terminal_state(TK_HEIGHT));
 
-    // Scroll to keep reference_point in the middle 1/3 of the screen
-    int bw = (screen_size.x - 26) / 3;
-    int bh = screen_size.y / 3;
+    // Scroll map viewport to keep reference_point in the middle 1/3 of the screen
+    Rectangle viewport(Point(26, 8), screen_size - Point(8, 8));
+
+    int bw = viewport.size().x / 3;
+    int bh = viewport.size().y / 3;
 
     Point screen_reference_point = reference_point - _map_scroll;
 
@@ -123,13 +142,23 @@ void Renderer::draw_game(const Fov& fov, const Point& reference_point)
         _map_scroll.y = reference_point.y - 2 * bh;
     }
 
-    terminal_bkcolor(0xff252526);
-    terminal_clear_area(26, 0, screen_size.x, screen_size.y);
+    clear_rectangle(viewport, 0xff252526);
+    draw_map(fov, viewport);
 
-    draw_map(fov, Rectangle(Point(26, 0), screen_size));
-
-    terminal_bkcolor(0xff333337);
     terminal_clear_area(0, 0, 26, screen_size.y);
+    clear_rectangle(Rectangle(Point(0, 0), Point(26, screen_size.y)), 0xff333337);
+
+    for (auto& status_bar : _status_bars)
+    {
+        draw_status_bar(status_bar.second);
+    }
+}
+
+void Renderer::clear_rectangle(const Rectangle& r, color_t clearColour)
+{
+    terminal_bkcolor(clearColour);
+    Point size = r.size();
+    terminal_clear_area(r.mins.x, r.mins.y, size.x, size.y);
 }
 
 void Renderer::draw_map(const Fov& fov, const Rectangle& viewport)
@@ -191,7 +220,27 @@ void Renderer::draw_map(const Fov& fov, const Rectangle& viewport)
         if (fov.can_see(actor.second.position))
         {
             terminal_color(actor.second.colour);
-            terminal_put(viewport.mins.x + actor.second.position.x - _map_scroll.x, viewport.mins.y + actor.second.position.y - _map_scroll.y, actor.second.code);
+            Point screen_position = viewport.mins + actor.second.position - _map_scroll;
+            if (viewport.contains(screen_position))
+            {
+                terminal_put(screen_position.x, screen_position.y, actor.second.code);
+            }
         }
     }
+}
+
+void Renderer::draw_status_bar(const StatusBar& status_bar)
+{
+    float ft = (status_bar.value - status_bar.min_value) / (float)(status_bar.max_value - status_bar.min_value);
+    int t = (int)(status_bar.rectangle.size().x * ft + 0.5f);
+    t = std::min(std::max(t, 0), status_bar.rectangle.size().x);
+    clear_rectangle(Rectangle(status_bar.rectangle.mins, status_bar.rectangle.mins + Point(t, 1)), 0xff008000);
+    clear_rectangle(Rectangle(status_bar.rectangle.mins + Point(t, 0), status_bar.rectangle.maxs), 0xff800000);
+    char label[1024];
+    int label_length = snprintf(label, sizeof(label), "%d / %d", status_bar.value, status_bar.max_value);
+    terminal_color(0xffffffff);
+    terminal_layer(1);
+    clear_rectangle(status_bar.rectangle, 0);
+    terminal_printf(status_bar.rectangle.mins.x + (status_bar.rectangle.size().x - label_length) / 2, status_bar.rectangle.mins.y, label);
+    terminal_layer(0);
 }
