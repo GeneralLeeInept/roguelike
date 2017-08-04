@@ -156,6 +156,7 @@
     <ClCompile Include="..\..\..\src\actor.cpp" />
     <ClCompile Include="..\..\..\src\dungeon.cpp" />
     <ClCompile Include="..\..\..\src\fov.cpp" />
+    <ClCompile Include="..\..\..\src\game_master.cpp" />
     <ClCompile Include="..\..\..\src\geometry.cpp" />
     <ClCompile Include="..\..\..\src\main.cpp" />
     <ClCompile Include="..\..\..\src\map_generator.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="..\..\..\src\actor_def.h" />
     <ClInclude Include="..\..\..\src\dungeon.h" />
     <ClInclude Include="..\..\..\src\fov.h" />
+    <ClInclude Include="..\..\..\src\game_master.h" />
     <ClInclude Include="..\..\..\src\geometry.h" />
     <ClInclude Include="..\..\..\src\map_def.h" />
     <ClInclude Include="..\..\..\src\map_generator.h" />

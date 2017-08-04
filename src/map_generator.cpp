@@ -136,6 +136,7 @@ void BasicMapGenerator::generate_map(const MapGeneratorParameters& parameters, M
 
 void TestMapGenerator::generate_map(const MapGeneratorParameters& parameters, MapDef& map_def)
 {
+    /* clang-format off */
     static const char* test_data[] = {
         "###############################################################################################################################################################",
         "#                  #                                                           #                  #                                                           #",
@@ -186,8 +187,9 @@ void TestMapGenerator::generate_map(const MapGeneratorParameters& parameters, Ma
         "#                                                                              #                                                                              #",
         "###############################################################################################################################################################",
     };
+    /* clang-format on */
 
-    map_def.size.x = strlen(test_data[0]);
+    map_def.size.x = (int)strlen(test_data[0]);
     map_def.size.y = sizeof(test_data) / sizeof(test_data[0]);
 
     for (int y = 0; y < map_def.size.y; ++y)
@@ -221,6 +223,59 @@ void TestMapGenerator::generate_map(const MapGeneratorParameters& parameters, Ma
                 monster.defence = 2;
                 monster.power = 4;
                 map_def.actors.push_back(monster);
+            }
+        }
+    }
+}
+
+void TownMapGenerator::generate_map(const MapGeneratorParameters& parameters, MapDef& map_def)
+{
+    /* clang-format off */
+    static const char* test_data[] = {
+        "################################################################################",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#       @                                                                      #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                      >                                       #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "#                                                                              #",
+        "################################################################################",
+    };
+    /* clang-format on */
+
+    map_def.size.x = (int)strlen(test_data[0]);
+    map_def.size.y = sizeof(test_data) / sizeof(test_data[0]);
+
+    for (int y = 0; y < map_def.size.y; ++y)
+    {
+        for (int x = 0; x < map_def.size.x; ++x)
+        {
+            map_def.tiles.push_back(test_data[y][x] == '#' ? TileType::Wall : TileType::Floor);
+
+            if (test_data[y][x] == '@')
+            {
+                map_def.spawn_position = Point(x, y);
             }
         }
     }

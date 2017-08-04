@@ -104,83 +104,47 @@ void generate_map()
 void init_renderer()
 {
     renderer.map_create(map_def);
-
-    for (auto& actor : dungeon.get_actors())
-    {
-        Renderer::ActorHandle handle = renderer.actor_create(actor->get_def().type, actor->get_position());
-        actor->set_renderer_handle(handle);
-    }
-
     status_bar_hp = renderer.status_bar_create(Rectangle(Point(2, 2), Point(24, 3)), 0, 20);
 }
 
 void run_game()
 {
-    generate_map();
-    dungeon.init(map_def);
     init_renderer();
 
-    // Game loop
-    size_t current_actor = 0;
+    generate_map();
+    dungeon.init(map_def);
 
+    // Game loop
     while (!want_exit)
     {
         process_input();
 
-        // Start turn (TODO)
-        // * Everyone accumulates energy
-        // * Everyone thinks (await player input)
-        // * Everyone with enough energy to act rolls for initiative (?)
-        // * Sort everyone with enough energy to act according to their
-        //   initiative
-        // * Everyone _tries_ to act - if you take your turn late your
-        //   move might get screwed up by an early mover
-
-        for (; current_actor < dungeon.get_actors().size(); ++current_actor)
-        {
-            Actor* actor = dungeon.get_actors().at(current_actor);
-
-            if (actor->can_act())
-            {
-                if (actor->needs_input())
-                {
-                    break;
-                }
-
-                actor->act();
-                renderer.actor_set_position(actor->get_renderer_handle(), actor->get_position());
-            }
-            else
-            {
-                actor->gain_energy();
-            }
-        }
-
-        if (current_actor >= dungeon.get_actors().size())
-        {
-            std::vector<Actor*> dead_actors;
-            for (auto& actor : dungeon.get_actors())
-            {
-                if (actor->get_fighter() && actor->get_fighter()->get_hp() < 0)
-                {
-                    dead_actors.push_back(actor);
-                }
-            }
-
-            for (auto& actor : dead_actors)
-            {
-                renderer.actor_destroy(actor->get_renderer_handle());
-                dungeon.remove_actor(*actor);
-            }
-
-            // End turn (TODO)
-            // * Tick dungeon
-
-            current_actor = 0;
-        }
+        // game master update..
 
         dungeon.get_player().update();
         renderer.status_bar_set_value(status_bar_hp, dungeon.get_player().get_fighter()->get_hp());
+
+        for (auto& actor : dungeon.get_actors())
+        {
+            Renderer::ActorHandle renderer_handle = actor->get_renderer_handle();
+
+            if (actor->get_fighter() == nullptr || actor->get_fighter()->is_alive())
+            {
+                if (renderer_handle == 0)
+                {
+                    Renderer::ActorHandle handle = renderer.actor_create(actor->get_def().type, actor->get_position());
+                    actor->set_renderer_handle(renderer_handle);
+                }
+
+                renderer.actor_set_position(renderer_handle, actor->get_position());
+            }
+            else
+            {
+                renderer.actor_destroy(renderer_handle);
+                actor->set_renderer_handle(0);
+            }
+        }
+
         renderer.draw_game(dungeon.get_player().get_fov(), dungeon.get_player().get_position());
         terminal_refresh();
     }

@@ -26,6 +26,11 @@ int MeleeFighter::get_power() const
     return _power;
 }
 
+bool MeleeFighter::is_alive() const
+{
+    return _hp >= 0;
+}
+
 void MeleeFighter::attack(MeleeFighter& opponent)
 {
     int damage = _power - opponent._defence;
@@ -70,7 +75,7 @@ void Actor::act()
 
 bool Actor::can_act() const
 {
-    return _energy >= 100;
+    return _energy >= 100 && (!_fighter || _fighter->get_hp() >= 0);
 }
 
 void Actor::gain_energy()

@@ -18,7 +18,9 @@ public:
     int get_defence() const;
     int get_hp() const;
     int get_power() const;
-    
+
+    bool is_alive() const;
+
     void attack(MeleeFighter& opponent);
     void take_damage(int damage);
 

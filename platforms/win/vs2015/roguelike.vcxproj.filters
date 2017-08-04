@@ -43,6 +43,9 @@
     <ClCompile Include="..\..\..\src\thinker.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\game_master.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\renderer.h">
@@ -79,6 +82,9 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\thinker.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\game_master.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

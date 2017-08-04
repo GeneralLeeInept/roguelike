@@ -79,8 +79,8 @@ Renderer::ActorHandle Renderer::actor_create(ActorType type, const Point& positi
     actor.code = _actor_render_info[type]._code;
     actor.colour = _actor_render_info[type]._colour;
     actor.position = position;
-    _actors[_next_actor_handle] = actor;
-    return _next_actor_handle++;
+    _actors[++_next_actor_handle] = actor;
+    return _next_actor_handle;
 }
 
 void Renderer::actor_destroy(ActorHandle actor)

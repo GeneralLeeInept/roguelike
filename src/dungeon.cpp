@@ -87,7 +87,7 @@ Actor* Dungeon::get_actor(const Point& position) const
     return nullptr;
 }
 
-const std::vector<Actor*>& Dungeon::get_actors() const
+std::vector<Actor*>& Dungeon::get_actors()
 {
     return _actors;
 }
