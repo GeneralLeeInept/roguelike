@@ -1,5 +1,6 @@
 #include "game_master.h"
 
+#include "actor.h"
 #include "dungeon.h"
 #include "map_generator.h"
 
@@ -29,9 +30,10 @@ void GameMaster::save_campaign()
 // Advance the campaign
 void GameMaster::update()
 {
-    if (_next_udpate_actor == _start_turn_sentinel)
+    std::vector<Actor*>& actors = _dungeon->get_actors();
+
+    if (_next_update_actor == _start_turn_sentinel)
     {
-        std::vector<Actor*>& actors = _dungeon->get_actors();
         actors.erase(
                 std::remove_if(actors.begin(), actors.end(),
                                [](Actor* actor) -> bool { return actor->get_fighter() != nullptr && actor->get_fighter()->is_alive() == false; }),
@@ -49,9 +51,9 @@ void GameMaster::update()
         _next_update_actor = 0;
     }
 
-    while (_next_update_actor < dungeon.get_actors().size())
+    while (_next_update_actor < _dungeon->get_actors().size())
     {
-        Actor* actor = dungeon.get_actors().at(current_actor);
+        Actor* actor = actors.at(_next_update_actor);
 
         if (actor->can_act())
         {
@@ -67,37 +69,38 @@ void GameMaster::update()
             actor->gain_energy();
         }
 
-        current_actor++;
+        _next_update_actor++;
     }
 
-    if (current_actor >= dungeon.get_actors().size())
+    if (_next_update_actor >= actors.size())
     {
-        std::vector<Actor*> dead_actors;
-        for (auto& actor : dungeon.get_actors())
-        {
-            if (actor->get_fighter() && actor->get_fighter()->get_hp() < 0)
-            {
-                dead_actors.push_back(actor);
-            }
-        }
-
-        for (auto& actor : dead_actors)
-        {
-            dungeon.remove_actor(*actor);
-        }
+        // End turn (TODO)
+        // * Tick dungeon
     }
-
-    // End turn (TODO)
-    // * Tick dungeon
 
     _next_update_actor = _start_turn_sentinel;
+}
+
+Dungeon& GameMaster::get_dungeon()
+{
+    return *_dungeon;
+}
+
+MapDef& GameMaster::get_map_def()
+{
+    return *_map_def;
+}
+
+Player& GameMaster::get_player()
+{
+    return _dungeon->get_player();
 }
 
 void GameMaster::on_change_level()
 {
     _dungeon.reset(new Dungeon);
     _dungeon->init(*_map_def);
-    _next_udpate_actor = _start_turn_sentinel;
+    _next_update_actor = _start_turn_sentinel;
     save_campaign();
 }
 

@@ -16,6 +16,10 @@ public:
 
     void update();
 
+    Dungeon& get_dungeon();
+    MapDef& get_map_def();
+    Player& get_player();
+
 private:
     void go_to_town();
     void on_change_level();
@@ -23,5 +27,5 @@ private:
     std::unique_ptr<MapDef> _map_def;
     std::unique_ptr<Dungeon> _dungeon;
     std::unique_ptr<Player> _player;
-    size_t _next_udpate_actor;
+    size_t _next_update_actor;
 };

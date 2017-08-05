@@ -10,9 +10,8 @@ class Player : public Actor
 public:
     Player(Dungeon& dungeon);
 
-    const Fov& get_fov() const;
+    Fov& get_fov();
     bool needs_input() const override;
-    void update();
 
 private:
     Fov _fov;

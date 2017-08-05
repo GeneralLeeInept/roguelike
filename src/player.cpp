@@ -16,12 +16,7 @@ bool Player::needs_input() const
     return get_fighter()->get_hp() >= 0 && !has_next_action();
 }
 
-void Player::update()
-{
-    _fov.update(get_position(), get_dungeon());
-}
-
-const Fov& Player::get_fov() const
+Fov& Player::get_fov()
 {
     return _fov;
 }

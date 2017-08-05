@@ -66,7 +66,7 @@ private:
     Point _position;
     int _speed;
     int _energy;
-    Renderer::ActorHandle _renderer_handle;
+    Renderer::ActorHandle _renderer_handle = 0;
     std::unique_ptr<Action> _next_action;
     std::unique_ptr<Thinker> _thinker;
     std::unique_ptr<MeleeFighter> _fighter;
